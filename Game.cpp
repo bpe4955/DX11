@@ -374,4 +374,21 @@ void Game::UpdateUI(float deltaTime)
 	input.SetMouseCapture(io.WantCaptureMouse);
 	// Show the demo window
 	ImGui::ShowDemoWindow();
+
+	BuildUI();
+}
+
+/// <summary>
+/// Build a custom Window in the UI
+/// </summary>
+void Game::BuildUI()
+{
+	ImGui::Text("Framerate: %f fps", ImGui::GetIO().Framerate);
+	ImGui::Text("Window Resolution: %dx%d", windowWidth, windowHeight);
+	//if (ImGui::Button("Click Me")) {
+	//
+	//}
+	//ImGui::SliderInt("Choose a number", &number, 0, 100);
+	//ImGui::ColorEdit4("RGBA color editor", &bgcolor);
+
 }

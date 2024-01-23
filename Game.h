@@ -25,6 +25,8 @@ private:
 	void LoadShaders(); 
 	void CreateGeometry();
 	void UpdateUI(float deltaTime);
+	void BuildUI();
+	//XMFLOAT4 bgcolor = XMFLOAT4(1.0f, 0.0f, 0.5f, 1.0f);
 
 	// Note the usage of ComPtr below
 	//  - This is a smart pointer for objects that abide by the
