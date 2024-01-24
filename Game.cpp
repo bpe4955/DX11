@@ -13,6 +13,10 @@
 // For the DirectX Math library
 using namespace DirectX;
 
+//Variables
+XMFLOAT4 uiColor(0.4f, 0.6f, 0.75f, 1.0f); // Default Cornflower Blue
+bool demoWindowVisible = true;
+
 // --------------------------------------------------------
 // Constructor
 //
@@ -298,7 +302,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	// - At the beginning of Game::Draw() before drawing *anything*
 	{
 		// Clear the back buffer (erases what's on the screen)
-		const float bgColor[4] = { 0.4f, 0.6f, 0.75f, 1.0f }; // Cornflower Blue
+		const float bgColor[4] = { uiColor.x, uiColor.y, uiColor.z, uiColor.w }; // Edited in custom debug menu
 		context->ClearRenderTargetView(backBufferRTV.Get(), bgColor);
 
 		// Clear the depth buffer (resets per-pixel occlusion information)
@@ -373,7 +377,7 @@ void Game::UpdateUI(float deltaTime)
 	input.SetKeyboardCapture(io.WantCaptureKeyboard);
 	input.SetMouseCapture(io.WantCaptureMouse);
 	// Show the demo window
-	ImGui::ShowDemoWindow();
+	if(demoWindowVisible) { ImGui::ShowDemoWindow(); }
 
 	BuildUI();
 }
@@ -383,12 +387,12 @@ void Game::UpdateUI(float deltaTime)
 /// </summary>
 void Game::BuildUI()
 {
+	ImGui::Begin("Custom Debug");
+
 	ImGui::Text("Framerate: %f fps", ImGui::GetIO().Framerate);
 	ImGui::Text("Window Resolution: %dx%d", windowWidth, windowHeight);
-	//if (ImGui::Button("Click Me")) {
-	//
-	//}
-	//ImGui::SliderInt("Choose a number", &number, 0, 100);
-	//ImGui::ColorEdit4("RGBA color editor", &bgcolor);
+	ImGui::ColorEdit4("Background Color", &uiColor.x);
+	if (ImGui::Button("Toggle ImGui Demo Window")) { demoWindowVisible = !demoWindowVisible; }
 
+	ImGui::End();
 }
