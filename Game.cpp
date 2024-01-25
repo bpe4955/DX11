@@ -384,11 +384,13 @@ void Game::UpdateUI(float deltaTime)
 }
 
 /// <summary>
-/// Build a custom Window in the UI
+/// Build a custom Window for the UI
 /// </summary>
 void Game::BuildUI()
 {
-	ImGui::Begin("Custom Debug");
+	char buf[128];
+	sprintf_s(buf, "Custom Debug %c###CustomDebug", "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3]);
+	ImGui::Begin(buf, NULL, ImGuiWindowFlags_AlwaysAutoResize);
 
 	ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 	if (ImGui::TreeNode("App Details"))
@@ -397,7 +399,7 @@ void Game::BuildUI()
 		if(fps > 60) { ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Framerate: %f fps", fps); }
 		else if (fps > 30) { ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Framerate: %f fps", fps); }
 		else { ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Framerate: %f fps", fps); }
-		
+		ImGui::Text("Frame Count: %d", ImGui::GetFrameCount());
 		ImGui::Text("Window Resolution: %dx%d", windowWidth, windowHeight);
 		ImGui::ColorEdit4("Background Color", &uiColor.x);
 		ImGui::Checkbox("ImGui Demo Window Visibility", &demoWindowVisible);
@@ -410,6 +412,17 @@ void Game::BuildUI()
 			isFullscreen = !isFullscreen;
 			swapChain->SetFullscreenState(isFullscreen, NULL); 
 		}
+
+		ImGui::Text("Font Scaling");
+		ImGuiIO& io = ImGui::GetIO();
+		const float MIN_SCALE = 0.5f;
+		const float MAX_SCALE = 2.0f;
+		static float window_scale = 1.0f;
+		ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
+		if (ImGui::DragFloat("window scale", &window_scale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp)) // Scale only this window
+			ImGui::SetWindowFontScale(window_scale);
+		ImGui::DragFloat("global scale", &io.FontGlobalScale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp); // Scale everything
+
 		ImGui::TreePop();
 	}
 
