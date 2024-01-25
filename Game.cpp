@@ -16,6 +16,7 @@ using namespace DirectX;
 //Variables
 XMFLOAT4 uiColor(0.4f, 0.6f, 0.75f, 1.0f); // Default Cornflower Blue
 bool demoWindowVisible = true;
+bool isFullscreen = false;
 
 // --------------------------------------------------------
 // Constructor
@@ -389,10 +390,28 @@ void Game::BuildUI()
 {
 	ImGui::Begin("Custom Debug");
 
-	ImGui::Text("Framerate: %f fps", ImGui::GetIO().Framerate);
-	ImGui::Text("Window Resolution: %dx%d", windowWidth, windowHeight);
-	ImGui::ColorEdit4("Background Color", &uiColor.x);
-	if (ImGui::Button("Toggle ImGui Demo Window")) { demoWindowVisible = !demoWindowVisible; }
+	ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+	if (ImGui::TreeNode("App Details"))
+	{
+		float fps = ImGui::GetIO().Framerate;
+		if(fps > 60) { ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Framerate: %f fps", fps); }
+		else if (fps > 30) { ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Framerate: %f fps", fps); }
+		else { ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Framerate: %f fps", fps); }
+		
+		ImGui::Text("Window Resolution: %dx%d", windowWidth, windowHeight);
+		ImGui::ColorEdit4("Background Color", &uiColor.x);
+		ImGui::Checkbox("ImGui Demo Window Visibility", &demoWindowVisible);
+
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Additional Elements"))
+	{
+		if (ImGui::Button(isFullscreen ? "Windowed" : "Fullscreen")) {
+			isFullscreen = !isFullscreen;
+			swapChain->SetFullscreenState(isFullscreen, NULL); 
+		}
+		ImGui::TreePop();
+	}
 
 	ImGui::End();
 }

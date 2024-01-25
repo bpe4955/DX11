@@ -26,7 +26,6 @@ private:
 	void CreateGeometry();
 	void UpdateUI(float deltaTime);
 	void BuildUI();
-	void InitVars();
 
 	// Note the usage of ComPtr below
 	//  - This is a smart pointer for objects that abide by the
