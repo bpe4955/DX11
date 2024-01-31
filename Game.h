@@ -3,6 +3,9 @@
 #include "DXCore.h"
 #include <DirectXMath.h>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
+#include <memory>
+#include "Mesh.h"
+#include <vector>
 
 class Game 
 	: public DXCore
@@ -26,6 +29,9 @@ private:
 	void CreateGeometry();
 	void UpdateUI(float deltaTime);
 	void BuildUI();
+
+	std::vector<std::shared_ptr<Mesh>>  meshes;
+	std::vector<Mesh>  meshesNOTPTR;
 
 	// Note the usage of ComPtr below
 	//  - This is a smart pointer for objects that abide by the
