@@ -15,7 +15,7 @@ using namespace DirectX;
 
 //Variables
 XMFLOAT4 uiColor(0.4f, 0.6f, 0.75f, 1.0f); // Default Cornflower Blue
-bool demoWindowVisible = true;
+bool demoWindowVisible = false;
 bool isFullscreen = false;
 
 // --------------------------------------------------------
@@ -187,6 +187,7 @@ void Game::CreateGeometry()
 	XMFLOAT4 red	= XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4 green	= XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 	XMFLOAT4 blue	= XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	XMFLOAT4 teal = XMFLOAT4(0.0f, 0.75f, 0.5f, 1.0f);
 
 	Vertex vertices[] =
 	{
@@ -198,7 +199,39 @@ void Game::CreateGeometry()
 	unsigned int indices[] = { 0, 1, 2 };
 
 	meshes.push_back(std::make_shared<Mesh>(&vertices[0], 3, &indices[0], 3, context, device));
-	//meshesNOTPTR.push_back(Mesh(&vertices[0], 3, &indices[0], 3, context, device));
+
+	Vertex vertices1[] =
+	{
+		{ XMFLOAT3(+0.45f, +0.5f, +0.0f), blue }, // top left 0
+		{ XMFLOAT3(+0.85f, +0.5f, +0.0f), blue }, // top right 1 
+		{ XMFLOAT3(+0.45f, +0.1f, +0.0f), green }, // bottom left 2
+		{ XMFLOAT3(+0.85f, +0.1f, +0.0f), green }, // bottom right 3
+	};
+
+	unsigned int indices1[] = { 0, 1, 2, 1, 3, 2 };
+	
+	meshes.push_back(std::make_shared<Mesh>(&vertices1[0], 4, &indices1[0], 6, context, device));
+
+	// Centered around -0.50, +0.25
+	// Radius 0.25
+	Vertex vertices2[] =
+	{
+		{ XMFLOAT3(-0.65f, +0.375f, +0.0f), blue }, // top left ex 
+		{ XMFLOAT3(-0.5f, +0.50f, +0.0f), blue }, // top 
+		{ XMFLOAT3(-0.35f, +0.375f, +0.0f), blue }, // top right ex 
+		{ XMFLOAT3(-0.375f, +0.125f, +0.0f), blue }, // bottom right ex 
+		{ XMFLOAT3(-0.625f, +0.125f, +0.0f), blue }, // bottom left ex 
+		{ XMFLOAT3(-0.55f, +0.375f, +0.0f), teal }, // top left int
+		{ XMFLOAT3(-0.45f, +0.375f, +0.0f), teal }, // top right int
+		{ XMFLOAT3(-0.425f, +0.25f, +0.0f), teal }, // bottom right int 
+		{ XMFLOAT3(-0.5f, +0.175f, +0.0f), teal }, // bottom 
+		{ XMFLOAT3(-0.575f, +0.25f, +0.0f), teal }, // bottom left int 
+		{ XMFLOAT3(-0.50f, +0.25f, +0.0f), green }, // bottom left int 
+	};
+
+	unsigned int indices2[] = { 1, 6, 5, 2, 7, 6, 3, 8, 7, 4, 9, 8, 0, 5, 9, 10, 8, 9, 10, 9, 5, 10, 5, 6, 10, 6, 7, 10, 7, 8  };
+
+	meshes.push_back(std::make_shared<Mesh>(&vertices2[0], 11, &indices2[0], 10*3, context, device));
 }
 
 
@@ -334,6 +367,15 @@ void Game::BuildUI()
 		if (ImGui::DragFloat("window scale", &window_scale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp)) // Scale only this window
 			ImGui::SetWindowFontScale(window_scale);
 		ImGui::DragFloat("global scale", &io.FontGlobalScale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp); // Scale everything
+
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Meshes"))
+	{
+		for (size_t i = 0; i < meshes.size(); i++)
+		{
+			ImGui::Text("Mesh %i: %i triangle(s), %i indices", i, meshes[i]->GetIndexCount()/3, meshes[i]->GetVertexCount());
+		}
 
 		ImGui::TreePop();
 	}
