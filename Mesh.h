@@ -19,6 +19,13 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11Device> _device);
 	~Mesh();
 	/// <summary>
+	/// Create the Vertex and Index buffers for the mesh
+	/// </summary>
+	/// <param name="vertices">The mesh's vertices</param>
+	/// <param name="indices">The mesh's indices</param>
+	/// <param name="_device">The ID3D11Device we are creating buffers with</param>
+	void CreateBuffers(Vertex* vertices, unsigned int* indices, Microsoft::WRL::ComPtr<ID3D11Device> _device);
+	/// <summary>
 	/// Returns the Vertex Buffer ComPtr
 	/// </summary>
 	/// <returns>The Vertex Buffer ComPtr</returns>

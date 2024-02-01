@@ -6,6 +6,7 @@
 #include <memory>
 #include "Mesh.h"
 #include <vector>
+#include "BuffStructs.h"
 
 class Game 
 	: public DXCore
@@ -31,6 +32,9 @@ private:
 	void BuildUI();
 
 	std::vector<std::shared_ptr<Mesh>>  meshes;
+
+	// Constant Buffer(s)
+	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
 	
 	// Shaders and shader-related constructs
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;

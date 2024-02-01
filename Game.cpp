@@ -103,6 +103,25 @@ void Game::Init()
 	ImGui_ImplDX11_Init(device.Get(), context.Get());
 	// Pick a style (uncomment one of these 3)
 	ImGui::StyleColorsDark();
+
+	//Create Constant Buffer
+	unsigned int size = sizeof(VertexShaderData);
+	size = ((size + 15) / 16) * 16;
+	D3D11_BUFFER_DESC cbDesc = {};
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;	// Will change
+	cbDesc.ByteWidth = size;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER; // Tells Direct3D this is a constant buffer
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	device->CreateBuffer(&cbDesc, 0, constantBuffer.GetAddressOf());
+
+	// Set Constant Buffer
+	context->VSSetConstantBuffers(
+		0, // Which slot (register) to bind the buffer to?
+		1, // How many are we setting right now?
+		constantBuffer.GetAddressOf()); // Array of buffers (or address of just one)
 }
 
 // --------------------------------------------------------
@@ -274,6 +293,16 @@ void Game::Draw(float deltaTime, float totalTime)
 		// Clear the depth buffer (resets per-pixel occlusion information)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
+
+	// Constant Buffer Update
+	VertexShaderData vsData;
+	vsData.colorTint = XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
+	vsData.offset = XMFLOAT3(0.25f, 0.0f, 0.0f);
+
+	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
+	context->Map(constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
+	memcpy(mappedBuffer.pData, &vsData, sizeof(vsData));
+	context->Unmap(constantBuffer.Get(), 0);
 
 	// DRAW geometry
 	for (size_t i = 0; i < meshes.size(); i++)

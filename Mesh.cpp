@@ -8,6 +8,17 @@ Mesh::Mesh(Vertex* vertices, int _vertexCount, unsigned int* indices, int _index
 	context = _context;
 	indexCount = _indexCount;
 	vertexCount = _vertexCount;
+
+	CreateBuffers(vertices, indices, _device);
+}
+
+Mesh::~Mesh()
+{
+}
+
+void Mesh::CreateBuffers(Vertex* vertices, unsigned int* indices, Microsoft::WRL::ComPtr<ID3D11Device> _device)
+{
+
 	// Create a VERTEX BUFFER
 	{
 		// First, we need to describe the buffer we want Direct3D to make on the GPU
@@ -45,10 +56,6 @@ Mesh::Mesh(Vertex* vertices, int _vertexCount, unsigned int* indices, int _index
 		// Actually create the buffer with the initial data
 		_device->CreateBuffer(&ibd, &initialIndexData, indexBuffer.GetAddressOf());
 	}
-}
-
-Mesh::~Mesh()
-{
 }
 
 void Mesh::Draw()
