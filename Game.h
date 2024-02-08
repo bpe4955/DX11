@@ -35,6 +35,8 @@ private:
 
 	// Constant Buffer(s)
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
+
+	VertexShaderData vsData;
 	
 	// Shaders and shader-related constructs
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;

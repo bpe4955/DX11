@@ -17,6 +17,8 @@ using namespace DirectX;
 XMFLOAT4 uiColor(0.4f, 0.6f, 0.75f, 1.0f); // Default Cornflower Blue
 bool demoWindowVisible = false;
 bool isFullscreen = false;
+XMFLOAT3 cbTranslate(0.25f, 0.0f, 0.0f);
+XMFLOAT4 cbColor(1.0f, 0.5f, 0.5f, 1.0f);
 
 // --------------------------------------------------------
 // Constructor
@@ -117,11 +119,15 @@ void Game::Init()
 
 	device->CreateBuffer(&cbDesc, 0, constantBuffer.GetAddressOf());
 
-	// Set Constant Buffer
+	// Set/Bind Constant Buffer
 	context->VSSetConstantBuffers(
 		0, // Which slot (register) to bind the buffer to?
 		1, // How many are we setting right now?
 		constantBuffer.GetAddressOf()); // Array of buffers (or address of just one)
+
+	// Base Bufer Data
+	vsData.colorTint = XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
+	vsData.offset = XMFLOAT3(0.25f, 0.0f, 0.0f);
 }
 
 // --------------------------------------------------------
@@ -295,9 +301,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 
 	// Constant Buffer Update
-	VertexShaderData vsData;
-	vsData.colorTint = XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
-	vsData.offset = XMFLOAT3(0.25f, 0.0f, 0.0f);
+	vsData.colorTint = cbColor;
+	vsData.offset = cbTranslate;
 
 	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
 	context->Map(constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
@@ -405,6 +410,13 @@ void Game::BuildUI()
 		{
 			ImGui::Text("Mesh %i: %i triangle(s), %i indices", i, meshes[i]->GetIndexCount()/3, meshes[i]->GetVertexCount());
 		}
+
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Constant Buffer"))
+	{
+		ImGui::SliderFloat3("Translate: ", &cbTranslate.x, -1.5f, 1.5f, "%.2f");
+		ImGui::ColorEdit4("Color Tint", &cbColor.x);
 
 		ImGui::TreePop();
 	}
