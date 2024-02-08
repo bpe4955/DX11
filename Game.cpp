@@ -125,9 +125,6 @@ void Game::Init()
 		1, // How many are we setting right now?
 		constantBuffer.GetAddressOf()); // Array of buffers (or address of just one)
 
-	// Base Bufer Data
-	vsData.colorTint = XMFLOAT4(1.0f, 0.5f, 0.5f, 1.0f);
-	vsData.offset = XMFLOAT3(0.25f, 0.0f, 0.0f);
 }
 
 // --------------------------------------------------------
@@ -203,7 +200,7 @@ void Game::LoadShaders()
 
 
 // --------------------------------------------------------
-// Creates the geometry we're going to draw - a single triangle for now
+// Creates the geometry we're going to draw 
 // --------------------------------------------------------
 void Game::CreateGeometry()
 {
@@ -257,6 +254,12 @@ void Game::CreateGeometry()
 	unsigned int indices2[] = { 1, 6, 5, 2, 7, 6, 3, 8, 7, 4, 9, 8, 0, 5, 9, 10, 8, 9, 10, 9, 5, 10, 5, 6, 10, 6, 7, 10, 7, 8  };
 
 	meshes.push_back(std::make_shared<Mesh>(&vertices2[0], 11, &indices2[0], 10*3, context, device));
+
+	for (size_t i = 0; i < meshes.size(); i++)
+	{
+		entities.push_back(Entity(meshes[i]));
+		//entities.push_back(Entity(meshes[i]));
+	}
 }
 
 
@@ -300,21 +303,13 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
-	// Constant Buffer Update
-	vsData.colorTint = cbColor;
-	vsData.offset = cbTranslate;
-
-	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
-	context->Map(constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
-	memcpy(mappedBuffer.pData, &vsData, sizeof(vsData));
-	context->Unmap(constantBuffer.Get(), 0);
-
-	// DRAW geometry
-	for (size_t i = 0; i < meshes.size(); i++)
+	// DRAW entities
+	for (size_t i = 0; i < entities.size(); i++)
 	{
-		meshes[i]->Draw();
+		entities[i].Draw(context, constantBuffer);
 	}
 
+	// DRAW ImGUI
 	ImGui::Render(); // Turns this frame’s UI into renderable triangles
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData()); // Draws it to the screen
 

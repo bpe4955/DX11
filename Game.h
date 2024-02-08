@@ -7,6 +7,7 @@
 #include "Mesh.h"
 #include <vector>
 #include "BuffStructs.h"
+#include "Entity.h"
 
 class Game 
 	: public DXCore
@@ -31,12 +32,13 @@ private:
 	void UpdateUI(float deltaTime);
 	void BuildUI();
 
+	// Store data for entities
 	std::vector<std::shared_ptr<Mesh>>  meshes;
+	std::vector<Entity> entities;
 
 	// Constant Buffer(s)
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
 
-	VertexShaderData vsData;
 	
 	// Shaders and shader-related constructs
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
