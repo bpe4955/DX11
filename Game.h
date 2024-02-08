@@ -3,6 +3,10 @@
 #include "DXCore.h"
 #include <DirectXMath.h>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
+#include <memory>
+#include "Mesh.h"
+#include <vector>
+#include "BuffStructs.h"
 
 class Game 
 	: public DXCore
@@ -24,15 +28,13 @@ private:
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders(); 
 	void CreateGeometry();
+	void UpdateUI(float deltaTime);
+	void BuildUI();
 
-	// Note the usage of ComPtr below
-	//  - This is a smart pointer for objects that abide by the
-	//     Component Object Model, which DirectX objects do
-	//  - More info here: https://github.com/Microsoft/DirectXTK/wiki/ComPtr
+	std::vector<std::shared_ptr<Mesh>>  meshes;
 
-	// Buffers to hold actual geometry data
-	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+	// Constant Buffer(s)
+	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
 	
 	// Shaders and shader-related constructs
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
