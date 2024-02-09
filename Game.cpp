@@ -258,7 +258,8 @@ void Game::CreateGeometry()
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
 		entities.push_back(Entity(meshes[i]));
-		//entities.push_back(Entity(meshes[i]));
+		entities.push_back(Entity(meshes[i]));
+		entities[i * 2 + 1].GetTransform()->SetPosition(XMFLOAT3(-0.5f, -0.5f, 0));
 	}
 }
 
@@ -408,10 +409,24 @@ void Game::BuildUI()
 
 		ImGui::TreePop();
 	}
-	if (ImGui::TreeNode("Constant Buffer"))
+	if (ImGui::TreeNode("Scene Entities"))
 	{
-		ImGui::SliderFloat3("Translate: ", &cbTranslate.x, -1.5f, 1.5f, "%.2f");
-		ImGui::ColorEdit4("Color Tint", &cbColor.x);
+		for (int i = 0; i < entities.size(); i++)
+		{
+			char buf[128];
+			sprintf_s(buf, "Entity %i",i);
+			if (ImGui::TreeNode(buf))
+			{
+				//ImGui::SliderFloat3("Position ", &entities[i].GetTransform()->GetPosition().x, -1.5f, 1.5f, "%.2f");
+				//ImGui::SliderFloat3("Position ", &entities[i].GetTransform()->GetScale().x, -1.5f, 1.5f, "%.2f");
+				if (ImGui::DragFloat3("Position ", &cbTranslate.x, 0.005f, -1.5f, 1.5f, "%.2f")) {
+
+				}
+				ImGui::TreePop();
+			}
+		}
+
+		//ImGui::ColorEdit4("Color Tint", &cbColor.x);
 
 		ImGui::TreePop();
 	}
