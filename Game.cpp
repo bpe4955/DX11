@@ -422,9 +422,9 @@ void Game::BuildUI()
 				XMFLOAT3 position = entityTransform.GetPosition();
 				XMFLOAT3 scale = entityTransform.GetScale();
 				XMFLOAT3 rotation = entityTransform.GetPitchYawRoll();
-				if (ImGui::SliderFloat3("Position ", &position.x, -1.5f, 1.5f, "%.2f")) { entities[i].GetTransform()->SetPosition(position); }
-				if (ImGui::SliderFloat3("Scale ", &scale.x, 0.1f, 3.0f, "%.2f")) { entities[i].GetTransform()->SetScale(scale); }
-				if (ImGui::SliderFloat3("Rotation ", &rotation.x, 0.0f, 6.28f, "%.2f")) { entities[i].GetTransform()->SetRotation(rotation); }
+				if (ImGui::DragFloat3("Position ", &position.x, 0.01f, -1.5f, 1.5f, "%.2f")) { entities[i].GetTransform()->SetPosition(position); }
+				if (ImGui::DragFloat3("Scale ", &scale.x, 0.01f, 0.1f, 3.0f, "%.2f")) { entities[i].GetTransform()->SetScale(scale); }
+				if (ImGui::DragFloat3("Rotation ", &rotation.x, 0.01f, 0.0f, 6.28f, "%.2f")) { entities[i].GetTransform()->SetRotation(rotation); }
 				ImGui::TreePop();
 			}
 		}
