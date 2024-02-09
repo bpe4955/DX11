@@ -415,13 +415,16 @@ void Game::BuildUI()
 		{
 			char buf[128];
 			sprintf_s(buf, "Entity %i",i);
+			// Edit transform of each entity
 			if (ImGui::TreeNode(buf))
 			{
-				//ImGui::SliderFloat3("Position ", &entities[i].GetTransform()->GetPosition().x, -1.5f, 1.5f, "%.2f");
-				//ImGui::SliderFloat3("Position ", &entities[i].GetTransform()->GetScale().x, -1.5f, 1.5f, "%.2f");
-				if (ImGui::DragFloat3("Position ", &cbTranslate.x, 0.005f, -1.5f, 1.5f, "%.2f")) {
-
-				}
+				Transform entityTransform = *entities[i].GetTransform();
+				XMFLOAT3 position = entityTransform.GetPosition();
+				XMFLOAT3 scale = entityTransform.GetScale();
+				XMFLOAT3 rotation = entityTransform.GetPitchYawRoll();
+				if (ImGui::SliderFloat3("Position ", &position.x, -1.5f, 1.5f, "%.2f")) { entities[i].GetTransform()->SetPosition(position); }
+				if (ImGui::SliderFloat3("Scale ", &scale.x, 0.1f, 3.0f, "%.2f")) { entities[i].GetTransform()->SetScale(scale); }
+				if (ImGui::SliderFloat3("Rotation ", &rotation.x, 0.0f, 6.28f, "%.2f")) { entities[i].GetTransform()->SetRotation(rotation); }
 				ImGui::TreePop();
 			}
 		}
