@@ -282,6 +282,16 @@ void Game::Update(float deltaTime, float totalTime)
 {
 	UpdateUI(deltaTime);
 
+	//Move Entities
+	for (size_t i = 0; i < entities.size(); i+=2)
+	{
+		entities[i].GetTransform()->Rotate(0, 0, deltaTime);
+	}
+	for (size_t i = 1; i < entities.size(); i += 2)
+	{
+		entities[i].GetTransform()->SetPosition(sin(totalTime), 0, 0);
+	}
+
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
