@@ -26,5 +26,5 @@ float4 main(VertexToPixel input) : SV_TARGET
 	float dist = distance(target, pixelCoord);
 
 	float s = sin(dist / 10.0f);
-	return float4(x, y, s, 1);
+	return float4(x*s, y*s, s, 1);
 }

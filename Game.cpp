@@ -128,9 +128,14 @@ void Game::Init()
 			1, // How many are we setting right now?
 			constantBuffer.GetAddressOf()); // Array of buffers (or address of just one)
 	}
-	// Create a Camera
-	camera = std::make_shared<Camera>(
-		(float)this->windowWidth / this->windowHeight, XMFLOAT3(0, 0, -1));
+	
+	// Create Cameras
+	cameraIndex = 0;
+	cameras.push_back(std::make_shared<Camera>(
+		(float)this->windowWidth / this->windowHeight, XMFLOAT3(0, 0, -1)));
+	cameras.push_back(std::make_shared<Camera>(
+		(float)this->windowWidth / this->windowHeight, XMFLOAT3(0, 0, -1)));
+	cameras[1]->UpdateProjMatrix(false, windowWidth, windowHeight);
 }
 
 // --------------------------------------------------------
@@ -279,7 +284,10 @@ void Game::OnResize()
 {
 	// Handle base-level DX resize stuff
 	DXCore::OnResize();
-	camera->UpdateProjMatrix((float)windowWidth/windowHeight);
+	for (size_t i = 0; i < cameras.size(); i++)
+	{
+		cameras[i]->UpdateProjMatrix((float)windowWidth / windowHeight, windowWidth, windowHeight);
+	}
 }
 
 // --------------------------------------------------------
@@ -290,7 +298,7 @@ void Game::Update(float deltaTime, float totalTime)
 	UpdateUI(deltaTime);
 
 	// Update Camera
-	camera->Update(deltaTime);
+	cameras[cameraIndex]->Update(deltaTime);
 
 	//Move Entities
 	for (size_t i = 0; i < entities.size(); i+=2)
@@ -327,7 +335,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	// DRAW entities
 	for (size_t i = 0; i < entities.size(); i++)
 	{
-		entities[i].Draw(context, constantBuffer, camera);
+		entities[i].Draw(context, constantBuffer, cameras[cameraIndex]);
 	}
 
 	// DRAW ImGUI
@@ -417,6 +425,13 @@ void Game::BuildUI()
 		if (ImGui::DragFloat("window scale", &window_scale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp)) // Scale only this window
 			ImGui::SetWindowFontScale(window_scale);
 		ImGui::DragFloat("global scale", &io.FontGlobalScale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp); // Scale everything
+
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Cameras"))
+	{
+		ImGui::RadioButton("Origin", &cameraIndex, 0); ImGui::SameLine();
+		ImGui::RadioButton("Orthographic", &cameraIndex, 1);
 
 		ImGui::TreePop();
 	}

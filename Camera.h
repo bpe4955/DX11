@@ -41,8 +41,6 @@ private:
 	DirectX::XMFLOAT4X4 projMatrix;
 	// Optimization data
 	bool dirtyView;
-	float viewWidth;
-	float viewHeight;
 	//bool dirtyProj;
 	// Customization data
 	float fov;

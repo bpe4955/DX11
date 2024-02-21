@@ -34,7 +34,8 @@ private:
 	void BuildUI();
 
 	// Camera
-	std::shared_ptr<Camera> camera;
+	std::vector<std::shared_ptr<Camera>> cameras;
+	int cameraIndex;
 
 	// Store data for entities
 	std::vector<std::shared_ptr<Mesh>>  meshes;
