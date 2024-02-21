@@ -13,8 +13,22 @@ public:
 	// Getters and Setters
 	DirectX::XMFLOAT4X4 GetViewMatrix();
 	DirectX::XMFLOAT4X4 GetProjMatrix();
+	DirectX::XMFLOAT3 GetPosition();
+	DirectX::XMFLOAT3 GetPitchYawRoll();
 	float GetOrthoScale();
 	void SetOrthoScale(float _orthoScale);
+	float GetFov();
+	void SetFov(float _fov);
+	float GetNearDist();
+	void SetNearDist(float _nearDist);
+	float GetFarDist();
+	void SetFarDist(float _farDist);
+	float GetMoveSpeed();
+	void SetMoveSpeed(float _moveSpeed);
+	float GetMouseSens();
+	void SetMouseSens(float _mouseSens);
+	bool GetIsPerspective();
+
 
 	/// <summary>
 	/// Processes user input, adjusts transform, and updates the view matrix
@@ -49,7 +63,7 @@ private:
 	float farDist;
 	float moveSpeed;
 	float mouseSens;
-	float isPerspective;
+	bool isPerspective;
 	float orthoScale;
 
 	// Functions

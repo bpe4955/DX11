@@ -24,7 +24,7 @@ Camera::Camera(float _viewWidth, float _viewHeight, DirectX::XMFLOAT3 _position)
 	: Camera(_viewWidth, _viewHeight, _position, DirectX::XMFLOAT3(0, 0, 0),
 		DirectX::XM_PIDIV2, 0.01f, 750.0f, 2.0f, 0.025f) {}
 
-//Getters
+// Getters
 DirectX::XMFLOAT4X4 Camera::GetViewMatrix()
 {
 	if (dirtyView) { UpdateViewMatrix(); }
@@ -34,17 +34,55 @@ DirectX::XMFLOAT4X4 Camera::GetProjMatrix()
 {
 	return projMatrix;
 }
+DirectX::XMFLOAT3 Camera::GetPosition() { return XMFLOAT3(transform.GetPosition()); }
+DirectX::XMFLOAT3 Camera::GetPitchYawRoll() { return XMFLOAT3(transform.GetPitchYawRoll()); }
 float Camera::GetOrthoScale()
 {
 	return orthoScale;
 }
+float Camera::GetFov() { return fov; }
+float Camera::GetNearDist() { return nearDist; }
+float Camera::GetFarDist() { return farDist; }
+float Camera::GetMoveSpeed() { return moveSpeed; }
+float Camera::GetMouseSens() { return mouseSens; }
+bool Camera::GetIsPerspective() { return isPerspective; }
 
-//Setters
+// Setters - Clamped
 void Camera::SetOrthoScale(float _orthoScale)
 {
 	if (_orthoScale > 1) { orthoScale = 1 / _orthoScale; }
 	else { orthoScale = _orthoScale; }
 }
+void Camera::SetFov(float _fov)
+{
+	if (_fov < XM_PIDIV4) { fov = XM_PIDIV4; return; }
+	if (_fov > XM_PIDIV2) { fov = XM_PIDIV2; return; }
+	fov = _fov;
+}
+void Camera::SetNearDist(float _nearDist)
+{
+	if (_nearDist < 0.005f) { nearDist = 0.005f; return; }
+	if (_nearDist >= farDist) { nearDist = farDist-1; return; }
+	nearDist = _nearDist;
+}
+void Camera::SetFarDist(float _farDist)
+{
+	if (_farDist <= nearDist) { farDist = nearDist + 1; return; }
+	if (_farDist > 1500.0f) { farDist = 1500.0f; return; }
+	farDist = _farDist;
+}
+void Camera::SetMoveSpeed(float _moveSpeed)
+{
+	if (_moveSpeed < 0.1f) { moveSpeed = 0.1f; return; }
+	moveSpeed = _moveSpeed;
+}
+void Camera::SetMouseSens(float _mouseSens)
+{
+	if (_mouseSens < 0.001f) { mouseSens = 0.001f; return; }
+	if (_mouseSens > 0.1f) { mouseSens = 0.1f; return; }
+	mouseSens = _mouseSens;
+}
+
 
 
 // Update
@@ -92,7 +130,7 @@ void Camera::CheckInput(Input& input, float dt)
 {
 	// Movement
 	float b = 1;
-	if (input.KeyDown(VK_CONTROL)) { b = 2; }
+	if (input.KeyDown(VK_CONTROL)) { b = 3; }
 	if (input.KeyDown('W')) { transform.TranslateRelative(0, 0, moveSpeed * dt * b); dirtyView = true; }
 	if (input.KeyDown('S')) { transform.TranslateRelative(0, 0, -moveSpeed * dt * b); dirtyView = true; }
 	if (input.KeyDown('A')) { transform.TranslateRelative(-moveSpeed * dt * b, 0, 0); dirtyView = true; }

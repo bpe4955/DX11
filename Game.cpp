@@ -14,11 +14,10 @@
 using namespace DirectX;
 
 //Variables
+const float RADTODEG = 57.2958f;
 XMFLOAT4 uiColor(0.4f, 0.6f, 0.75f, 1.0f); // Default Cornflower Blue
 bool demoWindowVisible = false;
 bool isFullscreen = false;
-XMFLOAT3 cbTranslate(0.25f, 0.0f, 0.0f);
-XMFLOAT4 cbColor(1.0f, 0.5f, 0.5f, 1.0f);
 
 // --------------------------------------------------------
 // Constructor
@@ -135,7 +134,7 @@ void Game::Init()
 	cameras.push_back(std::make_shared<Camera>(
 		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -1.0f)));
 	cameras.push_back(std::make_shared<Camera>(
-		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -1.0f)));
+		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -10.0f)));
 	cameras[1]->UpdateProjMatrix(false, (float)windowWidth, (float)windowHeight);
 }
 
@@ -431,17 +430,42 @@ void Game::BuildUI()
 	}
 	if (ImGui::TreeNode("Cameras"))
 	{
-		ImGui::RadioButton("Origin", &cameraIndex, 0); ImGui::SameLine();
+		ImGui::RadioButton("Perspective", &cameraIndex, 0); ImGui::SameLine();
 		ImGui::RadioButton("Orthographic", &cameraIndex, 1);
+		std::shared_ptr<Camera> camPtr = cameras[cameraIndex];
 
+		// Show Orthographic "zoom" slider
 		if (cameraIndex == 1) {
-			float orthoScale = 1 / cameras[cameraIndex]->GetOrthoScale();
-			if (ImGui::DragFloat("Orthogonal View Scale ", &orthoScale, 1.0f, 10.0f, 1500.0f, "%.0f")) 
+			float orthoScale = 1 / camPtr->GetOrthoScale();
+			if (ImGui::DragFloat("View Scale ", &orthoScale, 1.0f, 10.0f, 1500.0f, "%.0f")) 
 			{ 
-				cameras[cameraIndex]->SetOrthoScale(orthoScale);
-				cameras[cameraIndex]->UpdateProjMatrix((float)this->windowWidth, (float)this->windowHeight);
+				camPtr->SetOrthoScale(orthoScale);
+				camPtr->UpdateProjMatrix((float)this->windowWidth, (float)this->windowHeight);
 			}
 		}
+		// Show Perspective fov slider
+		else {
+			float fov = camPtr->GetFov()*RADTODEG;
+			if (ImGui::DragFloat("FOV Scale ", &fov, 0.1f, XM_PIDIV4*RADTODEG, XM_PIDIV2*RADTODEG, "%.2f"))
+			{
+				camPtr->SetFov(fov/RADTODEG);
+				camPtr->UpdateProjMatrix((float)this->windowWidth, (float)this->windowHeight);
+			}
+		}
+
+		ImVec4 cameraUIColor = (ImVec4)ImColor::HSV(0.3f, 0.5f, 0.5f);
+		ImGui::TextColored(cameraUIColor, "Camera Details:");
+		{
+			ImGui::TextColored(cameraUIColor, "Position: %0.2f, %0.2f, %0.2f",
+				camPtr->GetPosition().x, camPtr->GetPosition().y, camPtr->GetPosition().z);
+			ImGui::TextColored(cameraUIColor, "Rotation: %0.2f, %0.2f, %0.2f",
+				camPtr->GetPitchYawRoll().x * RADTODEG, camPtr->GetPitchYawRoll().y * RADTODEG, camPtr->GetPitchYawRoll().z * RADTODEG);
+			ImGui::TextColored(cameraUIColor, "Near Plane: %0.2f      Far Plane: %0.2f",
+				camPtr->GetNearDist(), camPtr->GetFarDist());
+			ImGui::TextColored(cameraUIColor, "Move Speed: %0.2f     Mouse Sens: %0.3f",
+				camPtr->GetMoveSpeed(), camPtr->GetMouseSens());
+		}
+
 
 		ImGui::TreePop();
 	}
