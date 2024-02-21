@@ -22,7 +22,7 @@ Camera::Camera(float _viewWidth, float _viewHeight, DirectX::XMFLOAT3 _position,
 }
 Camera::Camera(float _viewWidth, float _viewHeight, DirectX::XMFLOAT3 _position)
 	: Camera(_viewWidth, _viewHeight, _position, DirectX::XMFLOAT3(0, 0, 0),
-		DirectX::XM_PIDIV2, 0.01f, 750.0f, 2.0f, 0.025f) {}
+		DirectX::XM_PIDIV2, 0.01f, 750.0f, 2.0f, 0.015f) {}
 
 // Getters
 DirectX::XMFLOAT4X4 Camera::GetViewMatrix()
@@ -149,11 +149,11 @@ void Camera::CheckInput(Input& input, float dt)
 		transform.Rotate(cursorMovementY * mouseSens, 0, 0);
 		if (transform.GetPitchYawRoll().x > DirectX::XM_PIDIV2)
 		{
-			transform.SetRotation(DirectX::XM_PIDIV2, transform.GetPitchYawRoll().y, 0);
+			transform.SetRotation(DirectX::XM_PIDIV2-0.0001f, transform.GetPitchYawRoll().y, 0);
 		}
 		else if (transform.GetPitchYawRoll().x < -DirectX::XM_PIDIV2)
 		{
-			transform.SetRotation(-DirectX::XM_PIDIV2, transform.GetPitchYawRoll().y, 0);
+			transform.SetRotation(-DirectX::XM_PIDIV2+0.0001f, transform.GetPitchYawRoll().y, 0);
 		}
 	}
 }

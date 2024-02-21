@@ -136,6 +136,7 @@ void Game::Init()
 	cameras.push_back(std::make_shared<Camera>(
 		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -10.0f)));
 	cameras[1]->UpdateProjMatrix(false, (float)windowWidth, (float)windowHeight);
+	cameras[1]->SetMouseSens(0.005f);
 }
 
 // --------------------------------------------------------
