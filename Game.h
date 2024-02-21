@@ -8,6 +8,7 @@
 #include <vector>
 #include "BuffStructs.h"
 #include "Entity.h"
+#include "Camera.h"
 
 class Game 
 	: public DXCore
@@ -31,6 +32,9 @@ private:
 	void CreateGeometry();
 	void UpdateUI(float deltaTime);
 	void BuildUI();
+
+	// Camera
+	std::shared_ptr<Camera> camera;
 
 	// Store data for entities
 	std::vector<std::shared_ptr<Mesh>>  meshes;

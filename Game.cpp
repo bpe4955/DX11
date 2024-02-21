@@ -99,32 +99,38 @@ void Game::Init()
 	}
 
 	// Initialize ImGui itself & platform/renderer backends
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui_ImplWin32_Init(hWnd);
-	ImGui_ImplDX11_Init(device.Get(), context.Get());
-	// Pick a style (uncomment one of these 3)
-	ImGui::StyleColorsDark();
+	{
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGui_ImplWin32_Init(hWnd);
+		ImGui_ImplDX11_Init(device.Get(), context.Get());
+		// Pick a style (uncomment one of these 3)
+		ImGui::StyleColorsDark();
+	}
 
 	//Create Constant Buffer
-	unsigned int size = sizeof(VertexShaderData);
-	size = ((size + 15) / 16) * 16;
-	D3D11_BUFFER_DESC cbDesc = {};
-	cbDesc.Usage = D3D11_USAGE_DYNAMIC;	// Will change
-	cbDesc.ByteWidth = size;
-	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER; // Tells Direct3D this is a constant buffer
-	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbDesc.MiscFlags = 0;
-	cbDesc.StructureByteStride = 0;
+	{
+		unsigned int size = sizeof(VertexShaderData);
+		size = ((size + 15) / 16) * 16;
+		D3D11_BUFFER_DESC cbDesc = {};
+		cbDesc.Usage = D3D11_USAGE_DYNAMIC;	// Will change
+		cbDesc.ByteWidth = size;
+		cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER; // Tells Direct3D this is a constant buffer
+		cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		cbDesc.MiscFlags = 0;
+		cbDesc.StructureByteStride = 0;
 
-	device->CreateBuffer(&cbDesc, 0, constantBuffer.GetAddressOf());
+		device->CreateBuffer(&cbDesc, 0, constantBuffer.GetAddressOf());
 
-	// Set/Bind Constant Buffer
-	context->VSSetConstantBuffers(
-		0, // Which slot (register) to bind the buffer to?
-		1, // How many are we setting right now?
-		constantBuffer.GetAddressOf()); // Array of buffers (or address of just one)
-
+		// Set/Bind Constant Buffer
+		context->VSSetConstantBuffers(
+			0, // Which slot (register) to bind the buffer to?
+			1, // How many are we setting right now?
+			constantBuffer.GetAddressOf()); // Array of buffers (or address of just one)
+	}
+	// Create a Camera
+	camera = std::make_shared<Camera>(
+		(float)this->windowWidth / this->windowHeight, XMFLOAT3(0, 0, -1));
 }
 
 // --------------------------------------------------------
@@ -273,6 +279,7 @@ void Game::OnResize()
 {
 	// Handle base-level DX resize stuff
 	DXCore::OnResize();
+	camera->UpdateProjMatrix((float)windowWidth/windowHeight);
 }
 
 // --------------------------------------------------------
@@ -281,6 +288,9 @@ void Game::OnResize()
 void Game::Update(float deltaTime, float totalTime)
 {
 	UpdateUI(deltaTime);
+
+	// Update Camera
+	camera->Update(deltaTime);
 
 	//Move Entities
 	for (size_t i = 0; i < entities.size(); i+=2)
@@ -317,7 +327,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	// DRAW entities
 	for (size_t i = 0; i < entities.size(); i++)
 	{
-		entities[i].Draw(context, constantBuffer);
+		entities[i].Draw(context, constantBuffer, camera);
 	}
 
 	// DRAW ImGUI

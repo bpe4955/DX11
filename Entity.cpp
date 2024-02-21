@@ -11,11 +11,14 @@ std::shared_ptr<Transform> Entity::GetTransform() { return transform; }
 std::shared_ptr<Mesh> Entity::GetMesh() { return mesh; }
 
 void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
-	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer)
+	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer,
+	std::shared_ptr<Camera> camera)
 {
 	//Use transform matrix to fill ConstBuff
 	VertexShaderData vsData;
 	vsData.world = transform->GetWorldMatrix();
+	vsData.view = camera->GetViewMatrix();
+	vsData.proj = camera->GetProjMatrix();
 	vsData.colorTint = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
 	context->Map(constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
