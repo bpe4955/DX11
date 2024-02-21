@@ -1,31 +1,33 @@
 #pragma once
 #include "Input.h"
 #include "Transform.h"
-#include "stdexcept"
 
 class Camera
 {
 public:
-	Camera(float _aspectRatio, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation,
+	// Constructors
+	Camera(float _viewWidth, float _viewHeight, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation,
 		float _fov, float _nearDist, float _farDist, float _moveSpeed, float _mouseSens);
-	Camera(float _aspectRatio, DirectX::XMFLOAT3 _position);
+	Camera(float _viewWidth, float _viewHeight, DirectX::XMFLOAT3 _position);
 
+	// Getters and Setters
 	DirectX::XMFLOAT4X4 GetViewMatrix();
 	DirectX::XMFLOAT4X4 GetProjMatrix();
+	float GetOrthoScale();
+	void SetOrthoScale(float _orthoScale);
 
+	/// <summary>
+	/// Processes user input, adjusts transform, and updates the view matrix
+	/// </summary>
+	/// <param name="dt">Delta Time</param>
 	void Update(float dt);
 	/// <summary>
-	/// Updates the Projection Matrix given it is Perspective
-	/// </summary>
-	/// <param name="_aspectRatio">Aspect Ratio of the viewport</param>
-	void UpdateProjMatrix(float _aspectRatio);
-	/// <summary>
-	/// Updates the Projection Matrix if it's Orthographic or Perspective
+	/// Updates the Projection Matrix
 	/// </summary>
 	/// <param name="_aspectRatio">Aspect Ratio of the viewport</param>
 	/// <param name="_viewWidth">The viewport's width</param>
 	/// <param name="_viewHeight">The viewport's height</param>
-	void UpdateProjMatrix(float _aspectRatio, float _viewWidth, float _viewHeight);
+	void UpdateProjMatrix(float _viewWidth, float _viewHeight);
 	/// <summary>
 	/// Changes the projection matrix between Orthographic and Perspective, then updates it
 	/// </summary>
@@ -41,21 +43,19 @@ private:
 	DirectX::XMFLOAT4X4 projMatrix;
 	// Optimization data
 	bool dirtyView;
-	//bool dirtyProj;
 	// Customization data
 	float fov;
-	//float aspectRatio;
 	float nearDist;
 	float farDist;
 	float moveSpeed;
 	float mouseSens;
 	float isPerspective;
+	float orthoScale;
 
+	// Functions
 	void UpdateViewMatrix();
-	//void UpdateProjMatrix(float _aspectRatio, bool _isPerspective);
 
+	// Helper Functions
 	void CheckInput(Input& input, float dt);
-
-
 };
 

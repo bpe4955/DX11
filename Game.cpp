@@ -42,6 +42,7 @@ Game::Game(HINSTANCE hInstance)
 	CreateConsoleWindow(500, 120, 32, 120);
 	printf("Console window created successfully.  Feel free to printf() here.\n");
 #endif
+	cameraIndex = 0;
 }
 
 // --------------------------------------------------------
@@ -132,10 +133,10 @@ void Game::Init()
 	// Create Cameras
 	cameraIndex = 0;
 	cameras.push_back(std::make_shared<Camera>(
-		(float)this->windowWidth / this->windowHeight, XMFLOAT3(0, 0, -1)));
+		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -1.0f)));
 	cameras.push_back(std::make_shared<Camera>(
-		(float)this->windowWidth / this->windowHeight, XMFLOAT3(0, 0, -1)));
-	cameras[1]->UpdateProjMatrix(false, windowWidth, windowHeight);
+		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -1.0f)));
+	cameras[1]->UpdateProjMatrix(false, (float)windowWidth, (float)windowHeight);
 }
 
 // --------------------------------------------------------
@@ -286,7 +287,7 @@ void Game::OnResize()
 	DXCore::OnResize();
 	for (size_t i = 0; i < cameras.size(); i++)
 	{
-		cameras[i]->UpdateProjMatrix((float)windowWidth / windowHeight, windowWidth, windowHeight);
+		cameras[i]->UpdateProjMatrix((float)windowWidth, (float)windowHeight);
 	}
 }
 
@@ -307,7 +308,7 @@ void Game::Update(float deltaTime, float totalTime)
 	}
 	for (size_t i = 1; i < entities.size(); i += 2)
 	{
-		entities[i].GetTransform()->SetPosition(sin(totalTime), 0, 0);
+		entities[i].GetTransform()->SetPosition((float)sin(totalTime), 0, 0);
 	}
 
 	// Example input checking: Quit if the escape key is pressed
@@ -432,6 +433,15 @@ void Game::BuildUI()
 	{
 		ImGui::RadioButton("Origin", &cameraIndex, 0); ImGui::SameLine();
 		ImGui::RadioButton("Orthographic", &cameraIndex, 1);
+
+		if (cameraIndex == 1) {
+			float orthoScale = 1 / cameras[cameraIndex]->GetOrthoScale();
+			if (ImGui::DragFloat("Orthogonal View Scale ", &orthoScale, 1.0f, 10.0f, 1500.0f, "%.0f")) 
+			{ 
+				cameras[cameraIndex]->SetOrthoScale(orthoScale);
+				cameras[cameraIndex]->UpdateProjMatrix((float)this->windowWidth, (float)this->windowHeight);
+			}
+		}
 
 		ImGui::TreePop();
 	}

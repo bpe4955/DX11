@@ -3,7 +3,7 @@
 using namespace DirectX;
 
 // Constructors
-Camera::Camera(float _aspectRatio, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation,
+Camera::Camera(float _viewWidth, float _viewHeight, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT3 _rotation,
 	float _fov, float _nearDist, float _farDist, float _moveSpeed, float _mouseSens) :
 	fov(_fov),
 	nearDist(_nearDist),
@@ -11,17 +11,17 @@ Camera::Camera(float _aspectRatio, DirectX::XMFLOAT3 _position, DirectX::XMFLOAT
 	moveSpeed(_moveSpeed),
 	mouseSens(_mouseSens),
 	isPerspective(true),
+	orthoScale(1.0f / 350.0f),
 	dirtyView(true)
 {
 	transform = Transform();
 	transform.SetPosition(_position);
 	transform.SetRotation(_rotation);
 	UpdateViewMatrix();
-	UpdateProjMatrix(_aspectRatio);
+	UpdateProjMatrix(_viewWidth, _viewHeight);
 }
-
-Camera::Camera(float _aspectRatio, DirectX::XMFLOAT3 _position)
-	: Camera(_aspectRatio, _position, DirectX::XMFLOAT3(0, 0, 0),
+Camera::Camera(float _viewWidth, float _viewHeight, DirectX::XMFLOAT3 _position)
+	: Camera(_viewWidth, _viewHeight, _position, DirectX::XMFLOAT3(0, 0, 0),
 		DirectX::XM_PIDIV2, 0.01f, 750.0f, 2.0f, 0.025f) {}
 
 //Getters
@@ -33,6 +33,17 @@ DirectX::XMFLOAT4X4 Camera::GetViewMatrix()
 DirectX::XMFLOAT4X4 Camera::GetProjMatrix()
 {
 	return projMatrix;
+}
+float Camera::GetOrthoScale()
+{
+	return orthoScale;
+}
+
+//Setters
+void Camera::SetOrthoScale(float _orthoScale)
+{
+	if (_orthoScale > 1) { orthoScale = 1 / _orthoScale; }
+	else { orthoScale = _orthoScale; }
 }
 
 
@@ -51,37 +62,23 @@ void Camera::UpdateViewMatrix()
 	dirtyView = false;
 }
 
-void Camera::UpdateProjMatrix(float _aspectRatio)
-{
-	if (isPerspective) { 
-		XMStoreFloat4x4(&projMatrix,
-			XMMatrixPerspectiveFovLH(fov, _aspectRatio, nearDist, farDist));
-	}
-	else {
-		throw std::exception("Function doesn't properly update Orthogonal projections");
-	}
-}
-void Camera::UpdateProjMatrix(float _aspectRatio, float _viewWidth, float _viewHeight)
+void Camera::UpdateProjMatrix(float _viewWidth, float _viewHeight)
 {
 	if (isPerspective) {
 		XMStoreFloat4x4(&projMatrix,
-			XMMatrixPerspectiveFovLH(fov, _aspectRatio, nearDist, farDist));
+			XMMatrixPerspectiveFovLH(fov, _viewWidth / _viewHeight, nearDist, farDist));
 	}
 	else {
 		XMStoreFloat4x4(&projMatrix,
-			XMMatrixOrthographicLH(_viewWidth / 350, _viewHeight / 350, nearDist, farDist));
+			XMMatrixOrthographicLH(_viewWidth * orthoScale, _viewHeight * orthoScale, nearDist, farDist));
 	}
 }
 void Camera::UpdateProjMatrix(bool _isPerspective, float _viewWidth, float _viewHeight)
 {
 	isPerspective = _isPerspective;
-	UpdateProjMatrix(_viewWidth / _viewHeight, _viewWidth, _viewHeight);
+	UpdateProjMatrix(_viewWidth, _viewHeight);
 }
 
-/// <summary>
-/// Processes user input, adjusts transform, and updates the view matrix
-/// </summary>
-/// <param name="dt">Delta Time</param>
 void Camera::Update(float dt)
 {
 	// Get User Input
@@ -91,17 +88,17 @@ void Camera::Update(float dt)
 	if (dirtyView) { UpdateViewMatrix(); }
 }
 
-void Camera::CheckInput(Input& input, float dt) 
+void Camera::CheckInput(Input& input, float dt)
 {
-		// Movement
-		float b = 1;
-		if (input.KeyDown(VK_CONTROL)) { b = 2; }
-		if (input.KeyDown('W')) { transform.TranslateRelative(0, 0, moveSpeed * dt * b); dirtyView = true; }
-		if (input.KeyDown('S')) { transform.TranslateRelative(0, 0, -moveSpeed * dt * b); dirtyView = true; }
-		if (input.KeyDown('A')) { transform.TranslateRelative(-moveSpeed * dt * b, 0, 0); dirtyView = true; }
-		if (input.KeyDown('D')) { transform.TranslateRelative(moveSpeed * dt * b, 0, 0); dirtyView = true; }
-		if (input.KeyDown(VK_SHIFT)) { transform.TranslateAbsolute(0, -moveSpeed * dt * b, 0); dirtyView = true; }
-		if (input.KeyDown(VK_SPACE)) { transform.TranslateAbsolute(0, moveSpeed * dt * b, 0); dirtyView = true; }
+	// Movement
+	float b = 1;
+	if (input.KeyDown(VK_CONTROL)) { b = 2; }
+	if (input.KeyDown('W')) { transform.TranslateRelative(0, 0, moveSpeed * dt * b); dirtyView = true; }
+	if (input.KeyDown('S')) { transform.TranslateRelative(0, 0, -moveSpeed * dt * b); dirtyView = true; }
+	if (input.KeyDown('A')) { transform.TranslateRelative(-moveSpeed * dt * b, 0, 0); dirtyView = true; }
+	if (input.KeyDown('D')) { transform.TranslateRelative(moveSpeed * dt * b, 0, 0); dirtyView = true; }
+	if (input.KeyDown(VK_SHIFT)) { transform.TranslateAbsolute(0, -moveSpeed * dt * b, 0);  dirtyView = true; }
+	if (input.KeyDown(VK_SPACE)) { transform.TranslateAbsolute(0, moveSpeed * dt * b, 0); dirtyView = true; }
 
 	// Rotation
 	if (input.MouseLeftDown()) {
