@@ -11,19 +11,23 @@ std::shared_ptr<Transform> Entity::GetTransform() { return transform; }
 std::shared_ptr<Mesh> Entity::GetMesh() { return mesh; }
 
 void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
-	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer,
+	std::shared_ptr<SimpleVertexShader> vs,
+	std::shared_ptr<SimplePixelShader> ps,
 	std::shared_ptr<Camera> camera)
 {
-	//Use transform matrix to fill ConstBuff
-	VertexShaderData vsData;
-	vsData.world = transform->GetWorldMatrix();
-	vsData.view = camera->GetViewMatrix();
-	vsData.proj = camera->GetProjMatrix();
-	vsData.colorTint = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};
-	context->Map(constantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
-	memcpy(mappedBuffer.pData, &vsData, sizeof(vsData));
-	context->Unmap(constantBuffer.Get(), 0);
-	//Draw Mesh geometry
+	// Set active shaders
+	vs->SetShader();
+	ps->SetShader();
+
+	// Provide data for vertex shader's cbuffer
+	vs->SetFloat4("color", DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	vs->SetMatrix4x4("world", transform->GetWorldMatrix());
+	vs->SetMatrix4x4("view", camera->GetViewMatrix());
+	vs->SetMatrix4x4("proj", camera->GetProjMatrix());
+
+	// Copy Buffer Data to GPU
+	vs->CopyAllBufferData();
+
+	// Draw Mesh geometry
 	mesh->Draw();
 }

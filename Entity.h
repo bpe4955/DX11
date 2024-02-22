@@ -4,6 +4,7 @@
 #include "BuffStructs.h"
 #include <memory>
 #include "Camera.h"
+#include "SimpleShader.h"
 
 class Entity
 {
@@ -15,7 +16,8 @@ public:
 	std::shared_ptr<Mesh> GetMesh();
 
 	void Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
-		Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer,
+		std::shared_ptr<SimpleVertexShader> vs,
+		std::shared_ptr<SimplePixelShader> ps,
 		std::shared_ptr<Camera> camera);
 
 private:

@@ -9,6 +9,7 @@
 #include "BuffStructs.h"
 #include "Entity.h"
 #include "Camera.h"
+#include "SimpleShader.h"
 
 class Game 
 	: public DXCore
@@ -41,14 +42,9 @@ private:
 	std::vector<std::shared_ptr<Mesh>>  meshes;
 	std::vector<Entity> entities;
 
-	// Constant Buffer(s)
-	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
-
-	
-	// Shaders and shader-related constructs
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
+	// Simple Shaders
+	std::shared_ptr<SimpleVertexShader> vs;
+	std::shared_ptr<SimplePixelShader> ps;
 
 };
 
