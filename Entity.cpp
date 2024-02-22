@@ -20,7 +20,7 @@ void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
 	ps->SetShader();
 
 	// Provide data for vertex shader's cbuffer
-	vs->SetFloat4("color", DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	vs->SetFloat4("colorTint", DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 	vs->SetMatrix4x4("world", transform->GetWorldMatrix());
 	vs->SetMatrix4x4("view", camera->GetViewMatrix());
 	vs->SetMatrix4x4("proj", camera->GetProjMatrix());
