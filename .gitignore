@@ -71,6 +71,7 @@ StyleCopReport.xml
 *.ilk
 *.meta
 *.obj
+!assets/*
 *.iobj
 *.pch
 *.pdb
@@ -348,3 +349,9 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+
+    # exclude everything except directory assets
+    /*
+    /assets
+    /assets/*
