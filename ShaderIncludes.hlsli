@@ -14,7 +14,6 @@ struct VertexShaderInput
 	//  |    |                |
 	//  v    v                v
     float3 localPosition : POSITION; // XYZ position
-    float4 color : COLOR; // RGBA color
 };
 
 // Struct representing the data we're sending down the pipeline

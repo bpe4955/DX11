@@ -10,6 +10,8 @@
 #include "Entity.h"
 #include "Camera.h"
 #include "SimpleShader.h"
+#include "tiny_obj_loader.h"
+#define TINYOBJLOADER_IMPLEMENTATION
 
 class Game 
 	: public DXCore

@@ -5,7 +5,6 @@
 /// </summary>
 cbuffer DataFromCPU: register(b0)
 {
-	float4 colorTint;
     matrix world;
     matrix view;
     matrix proj;
@@ -26,8 +25,6 @@ VertexToPixel main( VertexShaderInput input )
     matrix mvp = mul(proj, mul(view, world));
 	
 	output.screenPosition = mul(mvp, float4(input.localPosition, 1.0f));
-	
-	output.color = input.color * colorTint;
 	
 	return output;
 }
