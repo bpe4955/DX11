@@ -2,6 +2,10 @@
 #include <wrl/client.h>
 #include <d3d11.h>
 #include "Vertex.h"
+#include "PathHelpers.h"
+#include <string>
+#include "tiny_obj_loader.h"
+#define TINYOBJLOADER_IMPLEMENTATION
 
 class Mesh
 {
@@ -15,6 +19,12 @@ private:
 public:
 	Mesh(Vertex* vertices, int _vertexCount,
 		unsigned int* indices, int _indexCount,
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext> _context,
+		Microsoft::WRL::ComPtr<ID3D11Device> _device);
+	Mesh(std::wstring relativeFilePath,
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext> _context,
+		Microsoft::WRL::ComPtr<ID3D11Device> _device);
+	Mesh(std::string relativeFilePath,
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> _context,
 		Microsoft::WRL::ComPtr<ID3D11Device> _device);
 	~Mesh();

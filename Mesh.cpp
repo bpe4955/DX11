@@ -12,6 +12,14 @@ Mesh::Mesh(Vertex* vertices, int _vertexCount, unsigned int* indices, int _index
 	CreateBuffers(vertices, indices, _device);
 }
 
+Mesh::Mesh(std::wstring relativeFilePath, Microsoft::WRL::ComPtr<ID3D11DeviceContext> _context, Microsoft::WRL::ComPtr<ID3D11Device> _device)
+{
+}
+
+Mesh::Mesh(std::string relativeFilePath, Microsoft::WRL::ComPtr<ID3D11DeviceContext> _context, Microsoft::WRL::ComPtr<ID3D11Device> _device)
+{
+}
+
 Mesh::~Mesh()
 {
 }

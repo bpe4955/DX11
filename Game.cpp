@@ -70,23 +70,15 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::Init()
 {
-	// Helper methods for loading shaders, creating some basic
-	// geometry to draw and some simple camera matrices.
-	//  - You'll be expanding and/or replacing these later
 	LoadShaders();
+	CreateMaterials();
 	CreateGeometry();
 
 	// Set initial graphics API state
-	//  - These settings persist until we change them
-	//  - Some of these, like the primitive topology & input layout, probably won't change
-	//  - Others, like setting shaders, will need to be moved elsewhere later
-	{
-		// Tell the input assembler (IA) stage of the pipeline what kind of
-		// geometric primitives (points, lines or triangles) we want to draw.  
-		// Essentially: "What kind of shape should the GPU draw with our vertices?"
-		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	}
+	// Tell the input assembler (IA) stage of the pipeline what kind of
+	// geometric primitives (points, lines or triangles) we want to draw.  
+	// Essentially: "What kind of shape should the GPU draw with our vertices?"
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Initialize ImGui itself & platform/renderer backends
 	{
@@ -106,6 +98,7 @@ void Game::Init()
 		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -10.0f)));
 	cameras[1]->UpdateProjMatrix(false, (float)windowWidth, (float)windowHeight);
 	cameras[1]->SetMouseSens(0.005f);
+
 }
 
 // --------------------------------------------------------
@@ -122,6 +115,12 @@ void Game::LoadShaders()
 	vs = std::make_shared<SimpleVertexShader>(device, context, FixPath(L"VertexShader.cso").c_str());
 }
 
+void Game::CreateMaterials()
+{
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vs, ps));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(0.2f, 1.0f, 0.7f, 1.0f), vs, ps));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(0.2f, 0.7f, 1.0f, 1.0f), vs, ps));
+}
 
 
 // --------------------------------------------------------
@@ -182,8 +181,9 @@ void Game::CreateGeometry()
 
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
-		entities.push_back(Entity(meshes[i]));
-		entities.push_back(Entity(meshes[i]));
+		entities.push_back(Entity(meshes[i], materials[i]));
+		entities.push_back(Entity(meshes[i], materials[i]));
+		entities.push_back(Entity(meshes[i], materials[i]));
 		entities[i * 2 + 1].GetTransform()->SetPosition(XMFLOAT3(-0.5f, -0.5f, 0));
 	}
 }
@@ -249,7 +249,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	// DRAW entities
 	for (size_t i = 0; i < entities.size(); i++)
 	{
-		entities[i].Draw(context, vs, ps, cameras[cameraIndex]);
+		entities[i].Draw(context, cameras[cameraIndex]);
 	}
 
 	// DRAW ImGUI

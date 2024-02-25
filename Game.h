@@ -10,8 +10,7 @@
 #include "Entity.h"
 #include "Camera.h"
 #include "SimpleShader.h"
-#include "tiny_obj_loader.h"
-#define TINYOBJLOADER_IMPLEMENTATION
+#include "Material.h"
 
 class Game 
 	: public DXCore
@@ -32,6 +31,7 @@ private:
 
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders(); 
+	void CreateMaterials();
 	void CreateGeometry();
 	void UpdateUI(float deltaTime);
 	void BuildUI();
@@ -41,7 +41,8 @@ private:
 	int cameraIndex;
 
 	// Store data for entities
-	std::vector<std::shared_ptr<Mesh>>  meshes;
+	std::vector<std::shared_ptr<Mesh>> meshes;
+	std::vector<std::shared_ptr<Material>> materials;
 	std::vector<Entity> entities;
 
 	// Simple Shaders
