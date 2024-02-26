@@ -1,5 +1,13 @@
 #include "ShaderIncludes.hlsli"
 
+/// <summary>
+/// Layout of our constant buffer
+/// </summary>
+cbuffer DataFromCPU : register(b0)
+{
+	float4 colorTint;
+}
+
 // --------------------------------------------------------
 // The entry point (main method) for our pixel shader
 // 

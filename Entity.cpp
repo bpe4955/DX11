@@ -36,6 +36,13 @@ void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
 	// Copy Buffer Data to GPU
 	vs->CopyAllBufferData();
 
+	// Provide data for pixel shader's cbuffer
+	// Strings must match names in PixelShader.hlsl
+	ps->SetFloat4("colorTint", material->GetColorTint());
+
+	// Copy Buffer Data to GPU
+	ps->CopyAllBufferData();
+
 	// Draw Mesh geometry
 	mesh->Draw();
 }
