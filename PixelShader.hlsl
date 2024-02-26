@@ -24,7 +24,6 @@ float4 main(VertexToPixel input) : SV_TARGET
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
 	//return input.color;
-
 	float x = sin(input.screenPosition.x / 10.0f);
 	float y = cos(input.screenPosition.y / 10.0f);
 
@@ -34,5 +33,5 @@ float4 main(VertexToPixel input) : SV_TARGET
 	float dist = distance(target, pixelCoord);
 
 	float s = sin(dist / 10.0f);
-	return float4(x*s, y*s, s, 1);
+	return float4(x*s, y*s, s, 1) * colorTint;
 }
