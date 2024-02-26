@@ -112,6 +112,7 @@ void Game::Init()
 void Game::LoadShaders()
 {
 	ps = std::make_shared<SimplePixelShader>(device, context, FixPath(L"PixelShader.cso").c_str());
+	ps2 = std::make_shared<SimplePixelShader>(device, context, FixPath(L"CustomPS.cso").c_str());
 	vs = std::make_shared<SimpleVertexShader>(device, context, FixPath(L"VertexShader.cso").c_str());
 }
 
@@ -119,8 +120,8 @@ void Game::CreateMaterials()
 {
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vs, ps));
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(0.2f, 1.0f, 0.7f, 1.0f), vs, ps));
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(0.2f, 0.7f, 1.0f, 1.0f), vs, ps));
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 0.7f, 0.2f, 1.0f), vs, ps));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(0.2f, 0.7f, 1.0f, 1.0f), vs, ps2));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 0.7f, 0.2f, 1.0f), vs, ps2));
 }
 
 
@@ -129,68 +130,75 @@ void Game::CreateMaterials()
 // --------------------------------------------------------
 void Game::CreateGeometry()
 {
-	// Create some temporary variables to represent colors
-	// - Not necessary, just makes things more readable
-	XMFLOAT4 red = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 green = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-	XMFLOAT4 teal = XMFLOAT4(0.0f, 0.75f, 0.5f, 1.0f);
-
-	Vertex vertices[] =
+	// 2D Geometry
+	/*
 	{
-		{ XMFLOAT3(+0.0f, +0.5f, +0.0f)},
-		{ XMFLOAT3(+0.5f, -0.5f, +0.0f) },
-		{ XMFLOAT3(-0.5f, -0.5f, +0.0f)},
-	};
+		// Create some temporary variables to represent colors
+		// - Not necessary, just makes things more readable
+		XMFLOAT4 red = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+		XMFLOAT4 green = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+		XMFLOAT4 blue = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+		XMFLOAT4 teal = XMFLOAT4(0.0f, 0.75f, 0.5f, 1.0f);
 
-	unsigned int indices[] = { 0, 1, 2 };
+		Vertex vertices[] =
+		{
+			{ XMFLOAT3(+0.0f, +0.5f, +0.0f)},
+			{ XMFLOAT3(+0.5f, -0.5f, +0.0f) },
+			{ XMFLOAT3(-0.5f, -0.5f, +0.0f)},
+		};
 
-	meshes.push_back(std::make_shared<Mesh>(&vertices[0], 3, &indices[0], 3, context, device));
+		unsigned int indices[] = { 0, 1, 2 };
 
-	Vertex vertices1[] =
-	{
-		{ XMFLOAT3(+0.45f, +0.5f, +0.0f)}, // top left 0
-		{ XMFLOAT3(+0.85f, +0.5f, +0.0f)}, // top right 1 
-		{ XMFLOAT3(+0.45f, +0.1f, +0.0f)}, // bottom left 2
-		{ XMFLOAT3(+0.85f, +0.1f, +0.0f)}, // bottom right 3
-	};
+		meshes.push_back(std::make_shared<Mesh>(&vertices[0], 3, &indices[0], 3, context, device));
 
-	unsigned int indices1[] = { 0, 1, 2, 1, 3, 2 };
+		Vertex vertices1[] =
+		{
+			{ XMFLOAT3(+0.45f, +0.5f, +0.0f)}, // top left 0
+			{ XMFLOAT3(+0.85f, +0.5f, +0.0f)}, // top right 1 
+			{ XMFLOAT3(+0.45f, +0.1f, +0.0f)}, // bottom left 2
+			{ XMFLOAT3(+0.85f, +0.1f, +0.0f)}, // bottom right 3
+		};
 
-	meshes.push_back(std::make_shared<Mesh>(&vertices1[0], 4, &indices1[0], 6, context, device));
+		unsigned int indices1[] = { 0, 1, 2, 1, 3, 2 };
 
-	// Centered around -0.50, +0.25
-	// Radius 0.25
-	Vertex vertices2[] =
-	{
-		{ XMFLOAT3(-0.65f, +0.375f, +0.0f)}, // top left ex 
-		{ XMFLOAT3(-0.5f, +0.50f, +0.0f)}, // top 
-		{ XMFLOAT3(-0.35f, +0.375f, +0.0f)}, // top right ex 
-		{ XMFLOAT3(-0.375f, +0.125f, +0.0f)}, // bottom right ex 
-		{ XMFLOAT3(-0.625f, +0.125f, +0.0f)}, // bottom left ex 
-		{ XMFLOAT3(-0.55f, +0.375f, +0.0f)}, // top left int
-		{ XMFLOAT3(-0.45f, +0.375f, +0.0f)}, // top right int
-		{ XMFLOAT3(-0.425f, +0.25f, +0.0f)}, // bottom right int 
-		{ XMFLOAT3(-0.5f, +0.175f, +0.0f) }, // bottom 
-		{ XMFLOAT3(-0.575f, +0.25f, +0.0f)}, // bottom left int 
-		{ XMFLOAT3(-0.50f, +0.25f, +0.0f) }, // bottom left int 
-	};
+		meshes.push_back(std::make_shared<Mesh>(&vertices1[0], 4, &indices1[0], 6, context, device));
 
-	unsigned int indices2[] = { 1, 6, 5, 2, 7, 6, 3, 8, 7, 4, 9, 8, 0, 5, 9, 10, 8, 9, 10, 9, 5, 10, 5, 6, 10, 6, 7, 10, 7, 8 };
+		// Centered around -0.50, +0.25
+		// Radius 0.25
+		Vertex vertices2[] =
+		{
+			{ XMFLOAT3(-0.65f, +0.375f,  +0.0f)}, // top left ex 
+			{ XMFLOAT3(-0.5f, +0.50f,    +0.0f)}, // top 
+			{ XMFLOAT3(-0.35f, +0.375f,  +0.0f)}, // top right ex 
+			{ XMFLOAT3(-0.375f, +0.125f, +0.0f)}, // bottom right ex 
+			{ XMFLOAT3(-0.625f, +0.125f, +0.0f)}, // bottom left ex 
+			{ XMFLOAT3(-0.55f, +0.375f,  +0.0f)}, // top left int
+			{ XMFLOAT3(-0.45f, +0.375f,  +0.0f)}, // top right int
+			{ XMFLOAT3(-0.425f, +0.25f,  +0.0f)}, // bottom right int 
+			{ XMFLOAT3(-0.5f, +0.175f,   +0.0f)}, // bottom 
+			{ XMFLOAT3(-0.575f, +0.25f,  +0.0f)}, // bottom left int 
+			{ XMFLOAT3(-0.50f, +0.25f,   +0.0f)}, // bottom left int 
+		};
 
-	meshes.push_back(std::make_shared<Mesh>(&vertices2[0], 11, &indices2[0], 10 * 3, context, device));
+		unsigned int indices2[] = { 1, 6, 5, 2, 7, 6, 3, 8, 7, 4, 9, 8, 0, 5, 9, 10, 8, 9, 10, 9, 5, 10, 5, 6, 10, 6, 7, 10, 7, 8 };
+
+		meshes.push_back(std::make_shared<Mesh>(&vertices2[0], 11, &indices2[0], 10 * 3, context, device));
+	}
+	*/
 
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cheburashka.obj").c_str(), context, device));
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/sphere.obj").c_str(), context, device));
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), context, device));
 
 	// Create Entities
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
 		entities.push_back(Entity(meshes[i], materials[i]));
-		entities.push_back(Entity(meshes[i], materials[i]));
-		entities.push_back(Entity(meshes[i], materials[i]));
-		entities[i * 2 + 1].GetTransform()->SetPosition(XMFLOAT3(-0.5f, -0.5f, 0));
+		entities[i * 2].GetTransform()->SetPosition(XMFLOAT3(-3.0f*(1+i), 0.0f, 0.0f));
+		entities.push_back(Entity(meshes[i], materials[3-i]));
+		entities[i * 2 + 1].GetTransform()->SetPosition(XMFLOAT3(3.0f * (1 + i), 0.0f, 0.0f));
 	}
+	
 }
 
 
@@ -223,10 +231,7 @@ void Game::Update(float deltaTime, float totalTime)
 	for (size_t i = 0; i < entities.size(); i += 2)
 	{
 		entities[i].GetTransform()->Rotate(0, 0, deltaTime);
-	}
-	for (size_t i = 1; i < entities.size(); i += 2)
-	{
-		entities[i].GetTransform()->SetPosition((float)sin(totalTime), 0, 0);
+		entities[i+1].GetTransform()->SetPosition((float)sin(totalTime) + i * 1.1f, 0, 0);
 	}
 
 	// Example input checking: Quit if the escape key is pressed
@@ -252,6 +257,9 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 
 	// DRAW entities
+	if (ps->HasVariable("totalTime")) { ps->SetFloat("totalTime", totalTime); }
+	if (ps2->HasVariable("totalTime")) { ps2->SetFloat("totalTime", totalTime); }
+		
 	for (size_t i = 0; i < entities.size(); i++)
 	{
 		entities[i].Draw(context, cameras[cameraIndex]);
