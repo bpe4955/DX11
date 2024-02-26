@@ -9,13 +9,6 @@
 
 class Mesh
 {
-private:
-	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
-	int vertexCount;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
-	int indexCount;
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
-
 public:
 	Mesh(Vertex* vertices, int _vertexCount,
 		unsigned int* indices, int _indexCount,
@@ -27,6 +20,9 @@ public:
 	Mesh(std::string relativeFilePath,
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> _context,
 		Microsoft::WRL::ComPtr<ID3D11Device> _device);
+	Mesh(const char* relativeFilePath,
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext> _context,
+		Microsoft::WRL::ComPtr<ID3D11Device> _device);
 	~Mesh();
 	/// <summary>
 	/// Create the Vertex and Index buffers for the mesh
@@ -35,6 +31,8 @@ public:
 	/// <param name="indices">The mesh's indices</param>
 	/// <param name="_device">The ID3D11Device we are creating buffers with</param>
 	void CreateBuffers(Vertex* vertices, unsigned int* indices, Microsoft::WRL::ComPtr<ID3D11Device> _device);
+	void LoadModel(std::string relativeFilePath);
+	void LoadModelGiven(std::string relativeFilePath);
 	/// <summary>
 	/// Returns the Vertex Buffer ComPtr
 	/// </summary>
@@ -59,5 +57,14 @@ public:
 	/// Activates the buffers and draws the correct number of indices
 	/// </summary>
 	void Draw();
+
+private:
+	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
+	int vertexCount;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
+	int indexCount;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
+	Microsoft::WRL::ComPtr<ID3D11Device> device;
+
 };
 

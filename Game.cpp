@@ -120,6 +120,7 @@ void Game::CreateMaterials()
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vs, ps));
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(0.2f, 1.0f, 0.7f, 1.0f), vs, ps));
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(0.2f, 0.7f, 1.0f, 1.0f), vs, ps));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 0.7f, 0.2f, 1.0f), vs, ps));
 }
 
 
@@ -179,6 +180,10 @@ void Game::CreateGeometry()
 
 	meshes.push_back(std::make_shared<Mesh>(&vertices2[0], 11, &indices2[0], 10 * 3, context, device));
 
+	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cheburashka.obj").c_str(), context, device));
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/sphere.obj").c_str(), context, device));
+
+	// Create Entities
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
 		entities.push_back(Entity(meshes[i], materials[i]));
