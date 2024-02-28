@@ -32,7 +32,7 @@ float4 main(VertexToPixel input) : SV_TARGET
     float2 pixelCoord = input.screenPosition.xy;
     float dist = distance(target*input.uv*input.uv, pixelCoord);
     float s = sin(dist / 10.0f);
-    float3 mask = (x * s, y * s, s);
+    float3 mask = float3(x * s, y * s, s);
     
     return float4(rgb * mask, 1) * colorTint;
 }
