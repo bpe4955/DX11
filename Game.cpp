@@ -189,13 +189,23 @@ void Game::CreateGeometry()
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cheburashka.obj").c_str(), context, device));
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/sphere.obj").c_str(), context, device));
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), context, device));
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cheburashka.obj").c_str(), context, device));
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/N square.obj").c_str(), context, device));
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/yoshi.obj").c_str(), context, device));
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/flower.dae").c_str(), context, device));
+	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/Pikachu (Gigantamax).dae").c_str(), context, device));
+	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/Pikachu (Gigantamax).fbx").c_str(), context, device));
+	
+	
 
 	// Create Entities
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
-		entities.push_back(Entity(meshes[i], materials[i]));
+		entities.push_back(Entity(meshes[i], materials[i % materials.size()]));
 		entities[i * 2].GetTransform()->SetPosition(XMFLOAT3(-3.0f*(1+i), 0.0f, 0.0f));
-		entities.push_back(Entity(meshes[i], materials[3-i]));
+		int maxMatInx = (int)materials.size() - 1;
+		int matInx = abs(maxMatInx) % materials.size();
+		entities.push_back(Entity(meshes[i], materials[matInx]));
 		entities[i * 2 + 1].GetTransform()->SetPosition(XMFLOAT3(3.0f * (1 + i), 0.0f, 0.0f));
 	}
 	

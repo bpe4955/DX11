@@ -1,6 +1,20 @@
 #include "Mesh.h"
 #include <iostream>
 #include <fstream>
+#include <vector>
+
+// https://github.com/assimp/assimp/blob/master/Build.md
+// github.com/Microsoft/vcpkg.git
+// git clone https
+// cd vcpkg
+// . / bootstrap - vcpkg.sh
+// . / vcpkg integrate install
+// . / vcpkg install assimp
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/material.h>
+
 using namespace DirectX;
 
 // Constructors
@@ -23,7 +37,8 @@ Mesh::Mesh(std::wstring relativeFilePath,
 	context(_context),
 	device(_device)
 {
-	LoadModelGiven(WideToNarrow(relativeFilePath));
+	//LoadModelGiven(WideToNarrow(relativeFilePath));
+	LoadModelAssimp(WideToNarrow(relativeFilePath));
 }
 
 Mesh::Mesh(std::string relativeFilePath, 
@@ -33,7 +48,8 @@ Mesh::Mesh(std::string relativeFilePath,
 	context(_context),
 	device(_device)
 {
-	LoadModelGiven(relativeFilePath);
+	//LoadModelGiven(relativeFilePath);
+	LoadModelAssimp(relativeFilePath);
 }
 
 Mesh::Mesh(const char* relativeFilePath, 
@@ -43,7 +59,8 @@ Mesh::Mesh(const char* relativeFilePath,
 	context(_context),
 	device(_device)
 {
-	LoadModelGiven(std::string(relativeFilePath));
+	//LoadModelGiven(std::string(relativeFilePath));
+	LoadModelAssimp(std::string(relativeFilePath));
 }
 
 Mesh::~Mesh() {}
@@ -55,83 +72,82 @@ int Mesh::GetIndexCount() { return indexCount; }
 int Mesh::GetVertexCount() { return vertexCount; }
 
 // Helper Functions
-/*
-void Mesh::LoadModel(std::string relativeFilePath)
+void Mesh::LoadModelAssimp(std::string fileName) 
 {
-	tinyobj::ObjReaderConfig reader_config;
-	reader_config.mtl_search_path = "./"; // Path to material files
+	const aiScene* scene = aiImportFile(fileName.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
 
-	tinyobj::ObjReader reader;
-
-	if (!reader.ParseFromFile(relativeFilePath, reader_config)) {
-		if (!reader.Error().empty()) {
-			std::cerr << "TinyObjReader: " << reader.Error();
-		}
-		exit(1);
+	if (!scene) {
+		std::cerr << "Could not load file " << fileName << ": " << aiGetErrorString() << std::endl;
+		return;
 	}
 
-	if (!reader.Warning().empty()) {
-		std::cout << "TinyObjReader: " << reader.Warning();
-	}
-
-	tinyobj::attrib_t attrib = reader.GetAttrib();
-	std::vector<tinyobj::shape_t> shapes = reader.GetShapes();
-	std::vector<tinyobj::material_t> materials = reader.GetMaterials();
-
-	// Loop over shapes
-	for (size_t s = 0; s < shapes.size(); s++) {
-		// Loop over faces(polygon)
-		size_t index_offset = 0;
-		for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
-			size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
-
-			// Loop over vertices in the face.
-			for (size_t v = 0; v < fv; v++) {
-				// access to vertex
-				tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
-				tinyobj::real_t vx = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
-				tinyobj::real_t vy = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
-				tinyobj::real_t vz = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
-
-				// Check if `normal_index` is zero or positive. negative = no normal data
-				if (idx.normal_index >= 0) {
-					tinyobj::real_t nx = attrib.normals[3 * size_t(idx.normal_index) + 0];
-					tinyobj::real_t ny = attrib.normals[3 * size_t(idx.normal_index) + 1];
-					tinyobj::real_t nz = attrib.normals[3 * size_t(idx.normal_index) + 2];
-				}
-
-				// Check if `texcoord_index` is zero or positive. negative = no texcoord data
-				if (idx.texcoord_index >= 0) {
-					tinyobj::real_t tx = attrib.texcoords[2 * size_t(idx.texcoord_index) + 0];
-					tinyobj::real_t ty = attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
-				}
-
-				// Optional: vertex colors
-				// tinyobj::real_t red   = attrib.colors[3*size_t(idx.vertex_index)+0];
-				// tinyobj::real_t green = attrib.colors[3*size_t(idx.vertex_index)+1];
-				// tinyobj::real_t blue  = attrib.colors[3*size_t(idx.vertex_index)+2];
-			}
-			index_offset += fv;
-
-			// per-face material
-			shapes[s].mesh.material_ids[f];
-		}
-	}
-
-	// Convert Vertices to play nice with custom shaders
-	std::vector<Vertex> vertices = std::vector<Vertex>();
-	for (size_t i = 0; i < attrib.vertices.size(); i++)
+	// Load all meshes (assimp separates a model into a mesh for each material)
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+	for (size_t i = 0; i < scene->mNumMeshes; i++)
 	{
-		Vertex v;
-		//v.position = attrib.vertices.at(i);
+		aiMesh* readMesh = scene->mMeshes[i];
 
-		
+		// Material Data
+		//aiMaterial* material = scene->mMaterials[readMesh->mMaterialIndex];
+		//aiColor4D specularColor;
+		//aiColor4D diffuseColor;
+		//aiColor4D ambientColor;
+		//float shininess;
+		//
+		//aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &specularColor);
+		//aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuseColor);
+		//aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &ambientColor);
+		//aiGetMaterialFloat(material, AI_MATKEY_SHININESS, &shininess);
+
+		// Vertex Data
+		if (readMesh->HasPositions() && readMesh->HasNormals())
+		{
+			for (size_t i = 0; i < readMesh->mNumVertices; i++)
+			{
+				Vertex v;
+
+				aiVector3D pos = readMesh->mVertices[i];
+				v.Position.x = pos.x;
+				v.Position.y = pos.y;
+				v.Position.z = pos.z;
+
+				aiVector3D norm = readMesh->mNormals[i];
+				v.Normal.x = norm.x;
+				v.Normal.y = norm.y;
+				v.Normal.z = norm.z;
+
+				if (readMesh->HasTextureCoords(0)) {
+					aiVector3D uv = readMesh->mTextureCoords[0][i];
+					v.UV.x = uv.x;
+					v.UV.y = uv.y;
+				}
+
+				vertices.push_back(v);
+			}
+		}
+
+		// Indices
+		//std::vector<unsigned int> indices;
+		//indices.reserve(readMesh->mNumFaces * 3);
+		for (size_t i = 0; i < readMesh->mNumFaces; i++)
+		{
+			//assert(readMesh->mFaces[i].mNumIndices == 3);
+
+			indices.push_back(readMesh->mFaces[i].mIndices[0]);
+			indices.push_back(readMesh->mFaces[i].mIndices[1]);
+			indices.push_back(readMesh->mFaces[i].mIndices[2]);
+		}
 	}
 
-	// Create Buffers
+	aiReleaseImport(scene);
 	
+	// Create Buffers
+	vertexCount = vertices.size();
+	indexCount = indices.size();
+	CreateBuffers(&vertices[0], &indices[0], device);
 }
-*/
+
 void Mesh::LoadModelGiven(std::string relativeFilePath) {
 	// Author: Chris Cascioli
 // Purpose: Basic .OBJ 3D model loading, supporting positions, uvs and normals

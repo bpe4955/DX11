@@ -133,9 +133,6 @@
     <ClInclude Include="SimpleShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tiny_obj_loader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
