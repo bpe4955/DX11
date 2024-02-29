@@ -4,12 +4,12 @@
 #include <vector>
 
 // https://github.com/assimp/assimp/blob/master/Build.md
-// github.com/Microsoft/vcpkg.git
-// git clone https
+// Might need to run bootstrap-vcpkg.bat if cannot detect ./vcpkg command
+// git clone http://github.com/Microsoft/vcpkg.git
 // cd vcpkg
-// . / bootstrap - vcpkg.sh
-// . / vcpkg integrate install
-// . / vcpkg install assimp
+// ./bootstrap-vcpkg.sh
+// ./vcpkg integrate install
+// ./vcpkg install assimp
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
