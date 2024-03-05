@@ -10,6 +10,10 @@ cbuffer DataFromCPU: register(b0)
     matrix proj;
 }
 
+//	cbuffer FrameData: register(b1)
+//	matrix view
+//	matrix proj
+
 // --------------------------------------------------------
 // The entry point (main method) for our vertex shader
 // 

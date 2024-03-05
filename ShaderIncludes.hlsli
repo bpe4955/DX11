@@ -1,5 +1,5 @@
-#ifndef __SOMETHING__
-#define __SOMETHING__
+#ifndef __GGP_SHADERINCLUDE__
+#define __GGP_SHADERINCLUDE__
 
 // Struct representing a single vertex worth of data
 // - This should match the vertex definition in our C++ code
