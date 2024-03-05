@@ -10,10 +10,10 @@
 // ./bootstrap-vcpkg.sh
 // ./vcpkg integrate install
 // ./vcpkg install assimp
-#include <assimp/cimport.h>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <assimp/material.h>
+#include "assimp/cimport.h"
+#include "assimp/scene.h"
+#include "assimp/postprocess.h"
+#include "assimp/material.h"
 
 using namespace DirectX;
 
