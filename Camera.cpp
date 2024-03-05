@@ -21,7 +21,7 @@ Camera::Camera(float _viewWidth, float _viewHeight, DirectX::XMFLOAT3 _position,
 	UpdateProjMatrix(_viewWidth, _viewHeight);
 }
 Camera::Camera(float _viewWidth, float _viewHeight, DirectX::XMFLOAT3 _position)
-	: Camera(_viewWidth, _viewHeight, _position, DirectX::XMFLOAT3(0, 0, 0),
+	: Camera(_viewWidth, _viewHeight, _position, DirectX::XMFLOAT3(0, DirectX::XM_PI, 0),
 		DirectX::XM_PIDIV2, 0.01f, 750.0f, 2.0f, 0.015f) {}
 
 // Getters

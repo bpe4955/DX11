@@ -18,6 +18,7 @@ const float RADTODEG = 57.2958f;
 XMFLOAT4 uiColor(0.4f, 0.6f, 0.75f, 1.0f); // Default Cornflower Blue
 bool demoWindowVisible = false;
 bool isFullscreen = false;
+XMFLOAT3 ambientColor(0.0f, 0.1f, 0.25f);
 
 // --------------------------------------------------------
 // Constructor
@@ -73,6 +74,7 @@ void Game::Init()
 	LoadShaders();
 	CreateMaterials();
 	CreateGeometry();
+	CreateLights();
 
 	// Set initial graphics API state
 	// Tell the input assembler (IA) stage of the pipeline what kind of
@@ -93,9 +95,9 @@ void Game::Init()
 	// Create Cameras
 	cameraIndex = 0;
 	cameras.push_back(std::make_shared<Camera>(
-		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -1.0f)));
+		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, 5.0f)));
 	cameras.push_back(std::make_shared<Camera>(
-		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -10.0f)));
+		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, 10.0f)));
 	cameras[1]->UpdateProjMatrix(false, (float)windowWidth, (float)windowHeight);
 	cameras[1]->SetMouseSens(0.005f);
 
@@ -118,12 +120,45 @@ void Game::LoadShaders()
 
 void Game::CreateMaterials()
 {
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vs, ps));
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(0.2f, 1.0f, 0.7f, 1.0f), vs, ps));
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(0.2f, 0.7f, 1.0f, 1.0f), vs, ps2));
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 0.7f, 0.2f, 1.0f), vs, ps2));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps2));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps2));
 }
 
+void Game::CreateLights()
+{
+	lights.push_back(Light{});
+	lights[0].Type = LIGHT_TYPE_DIR;
+	lights[0].Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	lights[0].Color = XMFLOAT3(0.2f, 0.2f, 1.0f);
+	lights[0].Intensity = 0.1f;
+	lights.push_back(Light{});
+	lights[1].Type = LIGHT_TYPE_DIR;
+	lights[1].Direction = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	lights[1].Color = XMFLOAT3(0.2f, 1.0f, 0.2f);
+	lights[1].Intensity = 0.2f;
+	lights.push_back(Light{});
+	lights[2].Type = LIGHT_TYPE_DIR;
+	lights[2].Direction = XMFLOAT3(-1.0f, -1.0f, 0.0f);
+	lights[2].Color = XMFLOAT3(1.0f, 0.2f, 0.2f);
+	lights[2].Intensity = 0.3f;
+
+	ps->SetData("lights",
+		&lights[0],
+		sizeof(Light)*MAX_NUM_LIGHTS);
+	ps2->SetData("lights",
+		&lights[0],
+		sizeof(Light) * MAX_NUM_LIGHTS);
+
+	int numLights = (int)lights.size();
+	ps->SetData("numLights",
+		&numLights,
+		sizeof(int));
+	ps2->SetData("numLights",
+		&numLights,
+		sizeof(int));
+}
 
 // --------------------------------------------------------
 // Creates the geometry we're going to draw 
@@ -145,11 +180,9 @@ void Game::CreateGeometry()
 	// Create Entities
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
-		entities.push_back(Entity(meshes[i], materials[i % materials.size()]));
+		entities.push_back(Entity(meshes[i], materials[i % 2]));
 		entities[i * 2].GetTransform()->SetPosition(XMFLOAT3(-3.0f*(1+i), 0.0f, 0.0f));
-		int maxMatInx = (int)materials.size() - 1;
-		int matInx = abs(maxMatInx) % materials.size();
-		entities.push_back(Entity(meshes[i], materials[matInx]));
+		entities.push_back(Entity(meshes[i], materials[i%2 + 2]));
 		entities[i * 2 + 1].GetTransform()->SetPosition(XMFLOAT3(3.0f * (1 + i), 0.0f, 0.0f));
 	}
 	
@@ -211,8 +244,11 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 
 	// DRAW entities
+	// Loop through shaders and set universal data
 	if (ps->HasVariable("totalTime")) { ps->SetFloat("totalTime", totalTime); }
 	if (ps2->HasVariable("totalTime")) { ps2->SetFloat("totalTime", totalTime); }
+	if (ps->HasVariable("ambient")) { ps->SetFloat3("ambient", ambientColor); }
+	if (ps2->HasVariable("ambient")) { ps2->SetFloat3("ambient", ambientColor); }
 		
 	for (size_t i = 0; i < entities.size(); i++)
 	{

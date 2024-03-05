@@ -23,25 +23,7 @@ void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
 	std::shared_ptr<SimplePixelShader> ps,
 	std::shared_ptr<Camera> camera)
 {
-	// Set active shaders
-	vs->SetShader();
-	ps->SetShader();
-
-	// Provide data for vertex shader's cbuffer
-	// Strings must match names in VertexShader.hlsl
-	vs->SetMatrix4x4("world", transform->GetWorldMatrix());
-	vs->SetMatrix4x4("view", camera->GetViewMatrix());
-	vs->SetMatrix4x4("proj", camera->GetProjMatrix());
-
-	// Copy Buffer Data to GPU
-	vs->CopyAllBufferData();
-
-	// Provide data for pixel shader's cbuffer
-	// Strings must match names in PixelShader.hlsl
-	ps->SetFloat4("colorTint", material->GetColorTint());
-
-	// Copy Buffer Data to GPU
-	ps->CopyAllBufferData();
+	SetShaders(vs, ps, camera);
 
 	// Draw Mesh geometry
 	mesh->Draw();
@@ -53,7 +35,15 @@ void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
 	// Get Reference to Shaders
 	std::shared_ptr<SimpleVertexShader> vs = material->GetVertShader();
 	std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
-	
+
+	SetShaders(vs, ps, camera);
+
+	// Draw Mesh geometry
+	mesh->Draw();
+}
+
+void Entity::SetShaders(std::shared_ptr<SimpleVertexShader> vs, std::shared_ptr<SimplePixelShader> ps, std::shared_ptr<Camera> camera)
+{
 	// Set active shaders
 	vs->SetShader();
 	ps->SetShader();
@@ -61,6 +51,7 @@ void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
 	// Provide data for vertex shader's cbuffer
 	// Strings must match names in VertexShader.hlsl
 	vs->SetMatrix4x4("world", transform->GetWorldMatrix());
+	vs->SetMatrix4x4("worldInvTranspose", transform->GetWorldInverseTransposeMatrix());
 	vs->SetMatrix4x4("view", camera->GetViewMatrix());
 	vs->SetMatrix4x4("proj", camera->GetProjMatrix());
 
@@ -70,10 +61,9 @@ void Entity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
 	// Provide data for pixel shader's cbuffer
 	// Strings must match names in PixelShader.hlsl
 	ps->SetFloat4("colorTint", material->GetColorTint());
+	ps->SetFloat("roughness", material->GetRoughness());
+	ps->SetFloat3("cameraPosition", camera->GetPosition());
 
 	// Copy Buffer Data to GPU
 	ps->CopyAllBufferData();
-
-	// Draw Mesh geometry
-	mesh->Draw();
 }

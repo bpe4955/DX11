@@ -182,7 +182,7 @@ void Transform::UpdateWorldMatrix()
 	XMMATRIX r = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&pitchYawRoll));
 
 	// Combine into a single world matrix
-	XMMATRIX worldMat = s * r * t;
+	XMMATRIX worldMat = s * r * t; 
 	XMStoreFloat4x4(&worldMatrix, worldMat);
 	XMStoreFloat4x4(&worldInverseTransposeMatrix,
 		XMMatrixInverse(0, XMMatrixTranspose(worldMat)));

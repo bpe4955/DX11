@@ -6,6 +6,7 @@
 cbuffer DataFromCPU: register(b0)
 {
     matrix world;
+    matrix worldInvTranspose;
     matrix view;
     matrix proj;
 }
@@ -30,6 +31,8 @@ VertexToPixel main( VertexShaderInput input )
 	
 	output.screenPosition = mul(mvp, float4(input.localPosition, 1.0f));
 	output.uv = input.uv;
+    output.normal = mul((float3x3)worldInvTranspose, input.normal);
+    output.worldPosition = mul(world, float4(input.localPosition, 1)).xyz;
 	
 	return output;
 }

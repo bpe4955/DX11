@@ -5,9 +5,8 @@
 /// <summary>
 /// Layout of our constant buffer
 /// </summary>
-cbuffer DataFromCPU : register(b0)
+cbuffer DataFromCPU : register(b1)
 {
-    float4 colorTint;
     float totalTime;
 }
 
@@ -16,6 +15,7 @@ cbuffer DataFromCPU : register(b0)
 
 float4 main(VertexToPixel input) : SV_TARGET
 {
+    
 	// New
     float ran = random(input.uv);
     float3 noise = float3(-ran, -ran, ran);
@@ -33,5 +33,5 @@ float4 main(VertexToPixel input) : SV_TARGET
     float s = sin(dist / 10.0f);
     float3 mask = float3(x * s, y * s, s);
     
-    return float4(rgb * mask, 1) * colorTint;
+    return float4(rgb * mask, 1) * colorTint * float4(totalLight(input.normal, input.worldPosition), 1);
 }

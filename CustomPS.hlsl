@@ -1,19 +1,14 @@
 #include "ShaderIncludes.hlsli"
+#include "Lighting.hlsli"
 
 /// <summary>
 /// Layout of our constant buffer
 /// </summary>
-cbuffer DataFromCPU : register(b0)
+cbuffer DataFromCPU : register(b1)
 {
-    float4 colorTint;
     float totalTime;
 }
 
-
-float random(float2 s)
-{
-    return frac(sin(dot(s, float2(12.9898, 78.233))) * 43758.5453123);
-}
 
 
 float4 main(VertexToPixel input) : SV_TARGET
@@ -27,5 +22,5 @@ float4 main(VertexToPixel input) : SV_TARGET
     float3 pulse = float3(1, 1, (tan(x / y) * tan(totalTime)));
     
     
-    return float4(xyz * pulse, 1) * colorTint;
+    return colorTint * float4(totalLight(input.normal, input.worldPosition), 1);
 }

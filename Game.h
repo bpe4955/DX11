@@ -11,6 +11,9 @@
 #include "Camera.h"
 #include "SimpleShader.h"
 #include "Material.h"
+#include "Light.h"
+
+#define MAX_NUM_LIGHTS 10
 
 class Game 
 	: public DXCore
@@ -33,12 +36,16 @@ private:
 	void LoadShaders(); 
 	void CreateMaterials();
 	void CreateGeometry();
+	void CreateLights();
 	void UpdateUI(float deltaTime);
 	void BuildUI();
 
 	// Camera
 	std::vector<std::shared_ptr<Camera>> cameras;
 	int cameraIndex;
+
+	// Lights
+	std::vector<Light> lights;
 
 	// Store data for entities
 	std::vector<std::shared_ptr<Mesh>> meshes;

@@ -35,5 +35,7 @@ private:
 	std::shared_ptr<Transform> transform;
 	std::shared_ptr<Mesh> mesh;
 	std::shared_ptr<Material> material;
+
+	void SetShaders(std::shared_ptr<SimpleVertexShader> vs, std::shared_ptr<SimplePixelShader> ps, std::shared_ptr<Camera> camera);
 };
 
