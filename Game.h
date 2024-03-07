@@ -43,6 +43,7 @@ private:
 	// Camera
 	std::vector<std::shared_ptr<Camera>> cameras;
 	int cameraIndex;
+	//ID3D11RasterizerState testRastState;
 
 	// Lights
 	std::vector<Light> lights;

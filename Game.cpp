@@ -101,6 +101,14 @@ void Game::Init()
 	cameras[1]->UpdateProjMatrix(false, (float)windowWidth, (float)windowHeight);
 	cameras[1]->SetMouseSens(0.005f);
 
+	// Rasterizer state
+	D3D11_RASTERIZER_DESC rd = {};
+	rd.CullMode = D3D11_CULL_NONE;
+	rd.FillMode = D3D11_FILL_SOLID;
+	//device->CreateRasterizerState(&rd, testRastState.GetAddressOf())
+
+	//context->RSSetState(testRastState.Get());
+
 }
 
 // --------------------------------------------------------
