@@ -105,9 +105,9 @@ void Game::Init()
 	D3D11_RASTERIZER_DESC rd = {};
 	rd.CullMode = D3D11_CULL_NONE;
 	rd.FillMode = D3D11_FILL_SOLID;
-	//device->CreateRasterizerState(&rd, testRastState.GetAddressOf())
+	device->CreateRasterizerState(&rd, testRastState.GetAddressOf());
 
-	//context->RSSetState(testRastState.Get());
+	context->RSSetState(testRastState.Get());
 
 }
 
