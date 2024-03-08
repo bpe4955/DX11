@@ -18,7 +18,8 @@ const float RADTODEG = 57.2958f;
 XMFLOAT4 uiColor(0.4f, 0.6f, 0.75f, 1.0f); // Default Cornflower Blue
 bool demoWindowVisible = false;
 bool isFullscreen = false;
-XMFLOAT3 ambientColor(0.0f, 0.1f, 0.25f);
+const float BRIGHTNESS = 0.1f;
+XMFLOAT3 ambientColor = XMFLOAT3(uiColor.x * BRIGHTNESS ,uiColor.y * BRIGHTNESS,uiColor.z * BRIGHTNESS) ;
 
 // --------------------------------------------------------
 // Constructor
@@ -223,11 +224,11 @@ void Game::Update(float deltaTime, float totalTime)
 	cameras[cameraIndex]->Update(deltaTime);
 
 	//Move Entities
-	for (size_t i = 0; i < entities.size(); i += 2)
-	{
-		entities[i].GetTransform()->Rotate(0, 0, deltaTime);
-		entities[i+1].GetTransform()->SetPosition((float)sin(totalTime) + i * 1.1f, 0, 0);
-	}
+	//for (size_t i = 0; i < entities.size(); i += 2)
+	//{
+	//	entities[i].GetTransform()->Rotate(0, 0, deltaTime);
+	//	entities[i+1].GetTransform()->SetPosition((float)sin(totalTime) + i * 1.1f, 0, 0);
+	//}
 
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
@@ -255,6 +256,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	// Loop through shaders and set universal data
 	if (ps->HasVariable("totalTime")) { ps->SetFloat("totalTime", totalTime); }
 	if (ps2->HasVariable("totalTime")) { ps2->SetFloat("totalTime", totalTime); }
+	XMFLOAT3 ambientColor = XMFLOAT3(uiColor.x * BRIGHTNESS, uiColor.y * BRIGHTNESS, uiColor.z * BRIGHTNESS);
 	if (ps->HasVariable("ambient")) { ps->SetFloat3("ambient", ambientColor); }
 	if (ps2->HasVariable("ambient")) { ps2->SetFloat3("ambient", ambientColor); }
 		
