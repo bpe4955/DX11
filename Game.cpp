@@ -140,18 +140,30 @@ void Game::CreateLights()
 	lights.push_back(Light{});
 	lights[0].Type = LIGHT_TYPE_DIR;
 	lights[0].Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
-	lights[0].Color = XMFLOAT3(0.2f, 0.2f, 1.0f);
+	lights[0].Color = XMFLOAT3(0.2f, 0.2f, 1.0f); // Blue
 	lights[0].Intensity = 0.1f;
 	lights.push_back(Light{});
 	lights[1].Type = LIGHT_TYPE_DIR;
 	lights[1].Direction = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	lights[1].Color = XMFLOAT3(0.2f, 1.0f, 0.2f);
+	lights[1].Color = XMFLOAT3(0.2f, 1.0f, 0.2f); // Green
 	lights[1].Intensity = 0.2f;
 	lights.push_back(Light{});
 	lights[2].Type = LIGHT_TYPE_DIR;
 	lights[2].Direction = XMFLOAT3(-1.0f, -1.0f, 0.0f);
-	lights[2].Color = XMFLOAT3(1.0f, 0.2f, 0.2f);
+	lights[2].Color = XMFLOAT3(1.0f, 0.2f, 0.2f); // Red
 	lights[2].Intensity = 0.3f;
+	lights.push_back(Light{});
+	lights[3].Type = LIGHT_TYPE_POINT;
+	lights[3].Position = XMFLOAT3(4.0f, 2.5f, -2.0f);
+	lights[3].Range = 7.0f;
+	lights[3].Color = XMFLOAT3(1.0f, 1.0f, 0.2f); // Yellow
+	lights[3].Intensity = 0.3f;
+	lights.push_back(Light{});
+	lights[4].Type = LIGHT_TYPE_POINT;
+	lights[4].Position = XMFLOAT3(9.0f, -0.5f, 1.65f);
+	lights[4].Range = 3.0f;
+	lights[4].Color = XMFLOAT3(1.0f, 0.2f, 1.0f); // Magenta
+	lights[4].Intensity = 0.7f;
 
 	ps->SetData("lights",
 		&lights[0],
@@ -224,11 +236,11 @@ void Game::Update(float deltaTime, float totalTime)
 	cameras[cameraIndex]->Update(deltaTime);
 
 	//Move Entities
-	//for (size_t i = 0; i < entities.size(); i += 2)
-	//{
-	//	entities[i].GetTransform()->Rotate(0, 0, deltaTime);
-	//	entities[i+1].GetTransform()->SetPosition((float)sin(totalTime) + i * 1.1f, 0, 0);
-	//}
+	for (size_t i = 0; i < entities.size(); i += 2)
+	{
+		entities[i].GetTransform()->Rotate(0, 0, deltaTime);
+		entities[i+1].GetTransform()->SetPosition((float)sin(totalTime) + i * 1.1f, 0, 0);
+	}
 
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
@@ -260,7 +272,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	if (ps->HasVariable("ambient")) { ps->SetFloat3("ambient", ambientColor); }
 	if (ps2->HasVariable("ambient")) { ps2->SetFloat3("ambient", ambientColor); }
 		
-	for (size_t i = 0; i < entities.size(); i++)
+	for (size_t i = 1; i < entities.size(); i+=2)
 	{
 		entities[i].Draw(context, cameras[cameraIndex]);
 	}

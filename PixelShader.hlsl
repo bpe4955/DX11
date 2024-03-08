@@ -10,12 +10,8 @@ cbuffer DataFromCPU : register(b1)
     float totalTime;
 }
 
-
-
-
 float4 main(VertexToPixel input) : SV_TARGET
 {
-    
 	// New
     float ran = random(input.uv);
     float3 noise = float3(-ran, -ran, ran);
