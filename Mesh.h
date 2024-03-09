@@ -29,7 +29,7 @@ public:
 	/// <param name="indices">The mesh's indices</param>
 	/// <param name="_device">The ID3D11Device we are creating buffers with</param>
 	void CreateBuffers(Vertex* vertices, unsigned int* indices, Microsoft::WRL::ComPtr<ID3D11Device> _device);
-	void LoadModelAssimp(std::string relativeFilePath);
+	//void LoadModelAssimp(std::string relativeFilePath);
 	void LoadModelGiven(std::string relativeFilePath);
 	/// <summary>
 	/// Returns the Vertex Buffer ComPtr

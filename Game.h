@@ -13,7 +13,6 @@
 #include "Material.h"
 #include "Light.h"
 
-#define MAX_NUM_LIGHTS 10
 
 class Game 
 	: public DXCore

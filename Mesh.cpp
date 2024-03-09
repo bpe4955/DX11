@@ -10,10 +10,10 @@
 // ./bootstrap-vcpkg.sh
 // ./vcpkg integrate install
 // ./vcpkg install assimp
-#include "assimp/cimport.h"
-#include "assimp/scene.h"
-#include "assimp/postprocess.h"
-#include "assimp/material.h"
+//#include "assimp/cimport.h"
+//#include "assimp/scene.h"
+//#include "assimp/postprocess.h"
+//#include "assimp/material.h"
 
 using namespace DirectX;
 
@@ -37,8 +37,8 @@ Mesh::Mesh(std::wstring relativeFilePath,
 	context(_context),
 	device(_device)
 {
-	//LoadModelGiven(WideToNarrow(relativeFilePath));
-	LoadModelAssimp(WideToNarrow(relativeFilePath));
+	LoadModelGiven(WideToNarrow(relativeFilePath));
+	//LoadModelAssimp(WideToNarrow(relativeFilePath));
 }
 
 Mesh::Mesh(std::string relativeFilePath, 
@@ -48,8 +48,8 @@ Mesh::Mesh(std::string relativeFilePath,
 	context(_context),
 	device(_device)
 {
-	//LoadModelGiven(relativeFilePath);
-	LoadModelAssimp(relativeFilePath);
+	LoadModelGiven(relativeFilePath);
+	//LoadModelAssimp(relativeFilePath);
 }
 
 Mesh::Mesh(const char* relativeFilePath, 
@@ -59,8 +59,8 @@ Mesh::Mesh(const char* relativeFilePath,
 	context(_context),
 	device(_device)
 {
-	//LoadModelGiven(std::string(relativeFilePath));
-	LoadModelAssimp(std::string(relativeFilePath));
+	LoadModelGiven(std::string(relativeFilePath));
+	//LoadModelAssimp(std::string(relativeFilePath));
 }
 
 Mesh::~Mesh() {}
@@ -72,6 +72,7 @@ int Mesh::GetIndexCount() { return indexCount; }
 int Mesh::GetVertexCount() { return vertexCount; }
 
 // Helper Functions
+/*
 void Mesh::LoadModelAssimp(std::string fileName) 
 {
 	const aiScene* scene = aiImportFile(fileName.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
@@ -147,6 +148,7 @@ void Mesh::LoadModelAssimp(std::string fileName)
 	indexCount = indices.size();
 	CreateBuffers(&vertices[0], &indices[0], device);
 }
+*/
 
 void Mesh::LoadModelGiven(std::string relativeFilePath) {
 	// Author: Chris Cascioli
