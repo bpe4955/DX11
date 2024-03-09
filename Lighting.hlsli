@@ -42,6 +42,18 @@ float Attenuate(Light light, float3 worldPos)
     return att * att;
 }
 
+float Attenuate(float dist, float range, float3 worldPos)
+{
+    float att = saturate(1.0f - (dist * dist / (range * range)));
+    return att * att;
+}
+
+float ConeAttenuate(float3 dir, Light light, float3 worldPosition)
+{
+    float angleFromCenter = max(dot(normalize(worldPosition - light.Position), light.Direction), 0.0f);
+    return pow(angleFromCenter, light.SpotFalloff);
+}
+
 float Lambert(float3 normal, float3 lightDir)
 {
     // angle between normal and direction to the light (negate Light Direction)
@@ -75,6 +87,15 @@ float3 PointLight(float3 normal, Light light, float3 viewVector, float specularP
     return light.Intensity * (diffuse + specular) * Attenuate(light, worldPosition) * light.Color;
 }
 
+float3 SpotLight(float3 normal, Light light, float3 viewVector, float specularPower, float3 worldPosition)
+{
+    float3 normLightDir = normalize(light.Direction);
+    float diffuse = Lambert(normal, normLightDir);
+    float specular = Phong(normal, normLightDir, viewVector, specularPower);
+    
+    return light.Intensity * (diffuse + specular) * Attenuate(light, worldPosition) * ConeAttenuate(normLightDir, light, worldPosition) * light.Color;
+}
+
 float3 totalLight(float3 _normal, float3 worldPosition)
 {
     float3 normal = normalize(_normal);
@@ -92,7 +113,7 @@ float3 totalLight(float3 _normal, float3 worldPosition)
                 totalLight += PointLight(normal, lights[i], viewVector, specularPower, worldPosition);
                 break;
             case LIGHT_TYPE_SPOT:
-            
+                totalLight += SpotLight(normal, lights[i], viewVector, specularPower, worldPosition);
                 break;
         }
     }

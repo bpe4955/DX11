@@ -28,6 +28,7 @@ public:
 	float GetMouseSens();
 	void SetMouseSens(float _mouseSens);
 	bool GetIsPerspective();
+	Transform GetTransform();
 
 
 	/// <summary>

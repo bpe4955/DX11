@@ -46,6 +46,7 @@ float Camera::GetFarDist() { return farDist; }
 float Camera::GetMoveSpeed() { return moveSpeed; }
 float Camera::GetMouseSens() { return mouseSens; }
 bool Camera::GetIsPerspective() { return isPerspective; }
+Transform Camera::GetTransform() { return transform; }
 
 // Setters - Clamped
 void Camera::SetOrthoScale(float _orthoScale)

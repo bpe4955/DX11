@@ -44,6 +44,7 @@ Game::Game(HINSTANCE hInstance)
 	printf("Console window created successfully.  Feel free to printf() here.\n");
 #endif
 	cameraIndex = 0;
+	spotLight = {};
 }
 
 // --------------------------------------------------------
@@ -137,33 +138,40 @@ void Game::CreateMaterials()
 
 void Game::CreateLights()
 {
+	spotLight.Type = LIGHT_TYPE_SPOT;
+	spotLight.Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
+	spotLight.Range = 1.0f;
+	spotLight.Position = XMFLOAT3(1.25f, 3.0f, 0.0f);
+	spotLight.Intensity = 0.2f;
+	spotLight.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	spotLight.SpotFalloff = 1.0f;
 	lights.push_back(Light{});
-	lights[0].Type = LIGHT_TYPE_DIR;
-	lights[0].Direction = XMFLOAT3(1.0f, -1.0f, 0.0f); // Affects top and right of objects
-	lights[0].Color = XMFLOAT3(0.2f, 0.2f, 1.0f); // Blue
-	lights[0].Intensity = 0.1f;
+	lights[lights.size()-1].Type = LIGHT_TYPE_DIR;
+	lights[lights.size()-1].Direction = XMFLOAT3(1.0f, -1.0f, 0.0f); // Affects top and right of objects
+	lights[lights.size()-1].Color = XMFLOAT3(0.2f, 0.2f, 1.0f); // Blue
+	lights[lights.size()-1].Intensity = 0.1f;
 	lights.push_back(Light{});
-	lights[1].Type = LIGHT_TYPE_DIR;
-	lights[1].Direction = XMFLOAT3(0.0f, 1.0f, 0.0f); // Affects bottom of objects
-	lights[1].Color = XMFLOAT3(0.2f, 1.0f, 0.2f); // Green
-	lights[1].Intensity = 0.2f;
+	lights[lights.size()-1].Type = LIGHT_TYPE_DIR;
+	lights[lights.size()-1].Direction = XMFLOAT3(0.0f, 1.0f, 0.0f); // Affects bottom of objects
+	lights[lights.size()-1].Color = XMFLOAT3(0.2f, 1.0f, 0.2f); // Green
+	lights[lights.size()-1].Intensity = 0.2f;
 	lights.push_back(Light{});
-	lights[2].Type = LIGHT_TYPE_DIR;
-	lights[2].Direction = XMFLOAT3(-1.0f, -1.0f, 0.0f); // Affects top and left of objects
-	lights[2].Color = XMFLOAT3(1.0f, 0.2f, 0.2f); // Red
-	lights[2].Intensity = 0.3f;
+	lights[lights.size()-1].Type = LIGHT_TYPE_DIR;
+	lights[lights.size()-1].Direction = XMFLOAT3(-1.0f, -1.0f, 0.0f); // Affects top and left of objects
+	lights[lights.size()-1].Color = XMFLOAT3(1.0f, 0.2f, 0.2f); // Red
+	lights[lights.size()-1].Intensity = 0.3f;
 	lights.push_back(Light{});
-	lights[3].Type = LIGHT_TYPE_POINT;
-	lights[3].Range = 5.0f;
-	lights[3].Position = XMFLOAT3(4.0f, 2.5f, -2.0f); // Located behind the cube / creature
-	lights[3].Color = XMFLOAT3(1.0f, 1.0f, 0.2f); // Yellow
-	lights[3].Intensity = 0.5f;
+	lights[lights.size()-1].Type = LIGHT_TYPE_POINT;
+	lights[lights.size()-1].Range = 5.0f;
+	lights[lights.size()-1].Position = XMFLOAT3(4.0f, 2.5f, -2.0f); // Located behind the cube / creature
+	lights[lights.size()-1].Color = XMFLOAT3(1.0f, 1.0f, 0.2f); // Yellow
+	lights[lights.size()-1].Intensity = 0.5f;
 	lights.push_back(Light{});
-	lights[4].Type = LIGHT_TYPE_POINT;
-	lights[4].Range = 3.0f;
-	lights[4].Position = XMFLOAT3(9.0f, -0.5f, 1.65f); // Located in front of yoshi
-	lights[4].Color = XMFLOAT3(1.0f, 0.2f, 1.0f); // Magenta
-	lights[4].Intensity = 0.7f;
+	lights[lights.size()-1].Type = LIGHT_TYPE_POINT;
+	lights[lights.size()-1].Range = 3.0f;
+	lights[lights.size()-1].Position = XMFLOAT3(9.0f, -0.5f, 1.65f); // Located in front of yoshi
+	lights[lights.size()-1].Color = XMFLOAT3(1.0f, 0.2f, 1.0f); // Magenta
+	lights[lights.size()-1].Intensity = 0.7f;
 
 	ps->SetData("lights",
 		&lights[0],
@@ -245,6 +253,14 @@ void Game::Update(float deltaTime, float totalTime)
 		entities[i].GetTransform()->Rotate(0, 0, deltaTime);
 		entities[i+1].GetTransform()->SetPosition((float)sin(totalTime) + i * 1.1f, 0, 0);
 	}
+
+	//Move SpotLight
+	spotLight.Position = cameras[cameraIndex]->GetPosition();
+	spotLight.Direction = cameras[cameraIndex]->GetTransform().GetForward();
+
+	ps2->SetData("spotLight",
+		&spotLight,
+		sizeof(Light));
 
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
@@ -445,12 +461,13 @@ void Game::BuildUI()
 	}
 	if (ImGui::TreeNode("Scene Lights"))
 	{
+		ImGui::ColorEdit3("Spotlight Color", &spotLight.Color.x);
 		for (int i = 0; i < lights.size(); i++)
 		{
 			char buf[128];
 			sprintf_s(buf, "Light %i Color", i);
 			// Edit color of each light
-			if (ImGui::ColorEdit4(buf, &lights[i].Color.x))
+			if (ImGui::ColorEdit3(buf, &lights[i].Color.x))
 			{
 				ps->SetData("lights",
 					&lights[0],

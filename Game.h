@@ -45,6 +45,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> testRastState;
 
 	// Lights
+	Light spotLight;
 	std::vector<Light> lights;
 
 	// Store data for entities

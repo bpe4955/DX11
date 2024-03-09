@@ -72,32 +72,32 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\packages\x64-windows\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\packages;$(ProjectDir)\packages\x64-windows\bin;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\packages\x64-windows\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\packages;$(ProjectDir)\packages\x64-windows\bin;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\packages\x64-windows\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\packages;$(ProjectDir)\packages\x64-windows\bin;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\packages\x64-windows\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\packages;$(ProjectDir)\packages\x64-windows\bin;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <VcpkgInstalledDir>.\packages</VcpkgInstalledDir>
+    <VcpkgInstalledDir>$(ProjectDir)\packages</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <VcpkgInstalledDir>.\packages</VcpkgInstalledDir>
+    <VcpkgInstalledDir>$(ProjectDir)\packages</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <VcpkgInstalledDir>.\packages</VcpkgInstalledDir>
+    <VcpkgInstalledDir>$(ProjectDir)\packages</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <VcpkgInstalledDir>.\packages</VcpkgInstalledDir>
+    <VcpkgInstalledDir>$(ProjectDir)\packages</VcpkgInstalledDir>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>

@@ -6,6 +6,7 @@
 /// </summary>
 cbuffer DataFromCPU : register(b1)
 {
+    Light spotLight;
 	float totalTime;
 }
 
@@ -18,7 +19,13 @@ float4 main(VertexToPixel input) : SV_TARGET
 	float z = tan((x / y) * intensity);
 	float3 xyz = float3(x, y, z);
 	float pulse = tan((x) / y + totalTime);
-
-    return colorTint * float4(totalLight(input.normal, input.worldPosition), 1);
+	
+	//Light
+    float3 normal = normalize(input.normal);
+    float3 viewVector = normalize(cameraPosition - input.worldPosition);
+    float specularPower = (1.0f - roughness) * MAX_SPECULAR_EXPONENT;
+	
+    return colorTint * float4(totalLight(input.normal, input.worldPosition) 
+	+ SpotLight(normal, spotLight, viewVector, specularPower, input.worldPosition), 1);
     //return float4(pulse.rrr+colorTint.xyz+xyz, 1) * float4(totalLight(input.normal, input.worldPosition), 1);
 }
