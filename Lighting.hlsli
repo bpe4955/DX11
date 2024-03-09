@@ -45,7 +45,7 @@ float Attenuate(Light light, float3 worldPos)
 float Lambert(float3 normal, float3 lightDir)
 {
     // angle between normal and direction to the light (negate Light Direction)
-    return dot(normal, -lightDir);
+    return saturate(dot(normal, -lightDir));
 }
 
 float Phong(float3 normal, float3 lightDir, float3 viewVector, float specularPower)

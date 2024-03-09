@@ -154,10 +154,10 @@ void Game::CreateLights()
 	lights[2].Intensity = 0.3f;
 	lights.push_back(Light{});
 	lights[3].Type = LIGHT_TYPE_POINT;
-	lights[3].Range = 7.0f;
-	lights[3].Position = XMFLOAT3(4.0f, 2.5f, -2.0f); // Located behind the cube
+	lights[3].Range = 5.0f;
+	lights[3].Position = XMFLOAT3(4.0f, 2.5f, -2.0f); // Located behind the cylinder
 	lights[3].Color = XMFLOAT3(1.0f, 1.0f, 0.2f); // Yellow
-	lights[3].Intensity = 0.3f;
+	lights[3].Intensity = 0.5f;
 	lights.push_back(Light{});
 	lights[4].Type = LIGHT_TYPE_POINT;
 	lights[4].Range = 3.0f;
