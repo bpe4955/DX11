@@ -441,8 +441,25 @@ void Game::BuildUI()
 			}
 		}
 
-		//ImGui::ColorEdit4("Color Tint", &cbColor.x);
-
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Scene Lights"))
+	{
+		for (int i = 0; i < lights.size(); i++)
+		{
+			char buf[128];
+			sprintf_s(buf, "Light %i Color", i);
+			// Edit color of each light
+			if (ImGui::ColorEdit4(buf, &lights[i].Color.x))
+			{
+				ps->SetData("lights",
+					&lights[0],
+					sizeof(Light) * MAX_NUM_LIGHTS);
+				ps2->SetData("lights",
+					&lights[0],
+					sizeof(Light) * MAX_NUM_LIGHTS);
+			}
+		}
 		ImGui::TreePop();
 	}
 
