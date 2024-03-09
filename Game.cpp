@@ -365,15 +365,15 @@ void Game::BuildUI()
 		ImGui::Text("Window Resolution: %dx%d", windowWidth, windowHeight);
 		ImGui::ColorEdit4("Background Color", &uiColor.x);
 		ImGui::Checkbox("ImGui Demo Window Visibility", &demoWindowVisible);
+		if (ImGui::Button(isFullscreen ? "Windowed" : "Fullscreen")) {
+			isFullscreen = !isFullscreen;
+			swapChain->SetFullscreenState(isFullscreen, NULL);
+		}
 
 		ImGui::TreePop();
 	}
 	if (ImGui::TreeNode("Additional Elements"))
 	{
-		if (ImGui::Button(isFullscreen ? "Windowed" : "Fullscreen")) {
-			isFullscreen = !isFullscreen;
-			swapChain->SetFullscreenState(isFullscreen, NULL);
-		}
 
 		ImGui::Text("Font Scaling");
 		ImGuiIO& io = ImGui::GetIO();
