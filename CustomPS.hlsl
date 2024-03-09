@@ -20,5 +20,5 @@ float4 main(VertexToPixel input) : SV_TARGET
 	float pulse = tan((x) / y + totalTime);
 
     return colorTint * float4(totalLight(input.normal, input.worldPosition), 1);
-    // return float4(pulse.rrr+colorTint+xyz, 1) * float4(totalLight(input.normal, input.worldPosition), 1);
+    //return float4(pulse.rrr+colorTint.xyz+xyz, 1) * float4(totalLight(input.normal, input.worldPosition), 1);
 }

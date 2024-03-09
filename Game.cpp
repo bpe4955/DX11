@@ -155,13 +155,13 @@ void Game::CreateLights()
 	lights.push_back(Light{});
 	lights[3].Type = LIGHT_TYPE_POINT;
 	lights[3].Range = 5.0f;
-	lights[3].Position = XMFLOAT3(4.0f, 2.5f, -2.0f); // Located behind the cylinder
+	lights[3].Position = XMFLOAT3(4.0f, 2.5f, -2.0f); // Located behind the cube / creature
 	lights[3].Color = XMFLOAT3(1.0f, 1.0f, 0.2f); // Yellow
 	lights[3].Intensity = 0.5f;
 	lights.push_back(Light{});
 	lights[4].Type = LIGHT_TYPE_POINT;
 	lights[4].Range = 3.0f;
-	lights[4].Position = XMFLOAT3(9.0f, -0.5f, 1.65f); // Located in front of the taurus
+	lights[4].Position = XMFLOAT3(9.0f, -0.5f, 1.65f); // Located in front of yoshi
 	lights[4].Color = XMFLOAT3(1.0f, 0.2f, 1.0f); // Magenta
 	lights[4].Intensity = 0.7f;
 
@@ -188,17 +188,17 @@ void Game::CreateGeometry()
 {
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cheburashka.obj").c_str(), context, device));
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/sphere.obj").c_str(), context, device));
-	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), context, device));
-	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cheburashka.obj").c_str(), context, device));
-	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/N square.obj").c_str(), context, device));
-	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/yoshi.obj").c_str(), context, device));
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), context, device)); 
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cheburashka.obj").c_str(), context, device));
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/N square.obj").c_str(), context, device));
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/yoshi.obj").c_str(), context, device));
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/flower.dae").c_str(), context, device));
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/Pikachu (Gigantamax).dae").c_str(), context, device));
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/Pikachu (Gigantamax).fbx").c_str(), context, device));
-	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cylinder.obj").c_str(), context, device));
-	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/helix.obj").c_str(), context, device));
-	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/torus.obj").c_str(), context, device));
-	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/quad.obj").c_str(), context, device));
+	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cylinder.obj").c_str(), context, device));
+	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/helix.obj").c_str(), context, device));
+	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/torus.obj").c_str(), context, device));
+	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/quad.obj").c_str(), context, device));
 	
 	
 
