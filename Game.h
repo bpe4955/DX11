@@ -30,7 +30,6 @@ public:
 	void Draw(float deltaTime, float totalTime);
 
 private:
-
 	// Initialization helper methods - feel free to customize, combine, remove, etc.
 	void LoadShaders(); 
 	void CreateMaterials();
@@ -57,6 +56,9 @@ private:
 	std::shared_ptr<SimpleVertexShader> vs;
 	std::shared_ptr<SimplePixelShader> ps;
 	std::shared_ptr<SimplePixelShader> ps2;
+
+
+	DirectX::XMFLOAT3 rayCast(float xpos, float ypos);
 
 };
 

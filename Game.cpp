@@ -140,7 +140,7 @@ void Game::CreateLights()
 {
 	spotLight.Type = LIGHT_TYPE_SPOT;
 	spotLight.Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-	spotLight.Range = 1.0f;
+	spotLight.Range = 5.0f;
 	spotLight.Position = XMFLOAT3(1.25f, 3.0f, 0.0f);
 	spotLight.Intensity = 0.2f;
 	spotLight.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
@@ -242,6 +242,8 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
+	Input& input = Input::GetInstance();
+
 	UpdateUI(deltaTime);
 
 	// Update Camera
@@ -256,14 +258,15 @@ void Game::Update(float deltaTime, float totalTime)
 
 	//Move SpotLight
 	spotLight.Position = cameras[cameraIndex]->GetPosition();
-	spotLight.Direction = cameras[cameraIndex]->GetTransform().GetForward();
+	XMFLOAT3 mouseDir = rayCast((float)input.GetMouseX(), (float)input.GetMouseY());
+	spotLight.Direction = mouseDir;
 
 	ps2->SetData("spotLight",
 		&spotLight,
 		sizeof(Light));
 
 	// Example input checking: Quit if the escape key is pressed
-	if (Input::GetInstance().KeyDown(VK_ESCAPE))
+	if (input.KeyDown(VK_ESCAPE))
 		Quit();
 }
 
@@ -481,4 +484,36 @@ void Game::BuildUI()
 	}
 
 	ImGui::End();
+}
+
+// https://stackoverflow.com/questions/71731722/correct-way-to-generate-3d-world-ray-from-2d-mouse-coordinates
+DirectX::XMFLOAT3 Game::rayCast(float xpos, float ypos)
+{
+	// converts a position from the 2d xpos, ypos to a normalized 3d direction
+	float x = (2.0f * xpos) / windowWidth - 1.0f;
+	float y = 1.0f - (2.0f * ypos) / windowHeight;
+	// or (2.0f * ypos) / SCR_HEIGHT - 1.0f; depending on how you calculate ypos/lastY
+	float z = 1.0f;
+	XMFLOAT3 ray_nds = XMFLOAT3(x, y, z);
+	XMFLOAT4 ray_clip = XMFLOAT4(ray_nds.x, ray_nds.y, ray_nds.z, 1.0f);
+	// eye space to clip we would multiply by projection so
+	// clip space to eye space is the inverse projection
+	XMFLOAT4X4 proj = cameras[cameraIndex]->GetProjMatrix();
+	XMMATRIX invProj = XMMatrixInverse(nullptr, XMLoadFloat4x4(&proj));
+	XMVECTOR rayEyeVec = XMVector4Transform(XMLoadFloat4(&ray_clip), invProj);
+	XMFLOAT4 rayEye;
+	XMStoreFloat4(&rayEye, rayEyeVec);
+	// convert point to forwards
+	rayEye = XMFLOAT4(rayEye.x, rayEye.y, rayEye.z, 0.0f);
+	rayEyeVec = XMLoadFloat4(&rayEye);
+	// world space to eye space is usually multiply by view so
+	// eye space to world space is inverse view
+	XMFLOAT4X4 view = cameras[cameraIndex]->GetViewMatrix();
+	XMMATRIX viewMatInv = XMMatrixInverse(nullptr, XMLoadFloat4x4(&view));
+	XMFLOAT4 inv_ray_wor;
+	XMStoreFloat4(&inv_ray_wor, XMVector4Transform(rayEyeVec, viewMatInv));
+	XMFLOAT3 ray_wor = XMFLOAT3(inv_ray_wor.x, inv_ray_wor.y, inv_ray_wor.z);
+	XMVECTOR ray_wor_vec = XMVector3Normalize(XMLoadFloat3(&ray_wor));
+	XMStoreFloat3(&ray_wor, ray_wor_vec);
+	return ray_wor;
 }

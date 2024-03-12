@@ -10,7 +10,7 @@
 // cd vcpkg
 // ./bootstrap-vcpkg.sh
 // ./vcpkg integrate install
-// ./vcpkg install assimp
+// ./vcpkg install assimp							(Auto done by Visual Studio)
 
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
