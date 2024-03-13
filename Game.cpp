@@ -503,20 +503,19 @@ DirectX::XMFLOAT3 Game::MouseRayCast()
 	float z = 1.0f;
 	XMFLOAT3 ray_nds = XMFLOAT3(x, y, z);
 	XMFLOAT4 ray_clip = XMFLOAT4(ray_nds.x, ray_nds.y, ray_nds.z, 1.0f);
+
 	// eye space to clip we would multiply by projection so
 	// clip space to eye space is the inverse projection
 	XMFLOAT4X4 proj = cameras[cameraIndex]->GetProjMatrix();
 	XMMATRIX invProj = XMMatrixInverse(nullptr, XMLoadFloat4x4(&proj));
 	XMVECTOR rayEyeVec = XMVector4Transform(XMLoadFloat4(&ray_clip), invProj);
-	XMFLOAT4 rayEye;
-	XMStoreFloat4(&rayEye, rayEyeVec);
-	// convert point to forwards
-	rayEye = XMFLOAT4(rayEye.x, rayEye.y, rayEye.z, 0.0f);
-	rayEyeVec = XMLoadFloat4(&rayEye);
+
 	// world space to eye space is usually multiply by view so
 	// eye space to world space is inverse view
 	XMFLOAT4X4 view = cameras[cameraIndex]->GetViewMatrix();
 	XMMATRIX viewMatInv = XMMatrixInverse(nullptr, XMLoadFloat4x4(&view));
+
+	// Convert float4 to float3 and normalize
 	XMFLOAT4 inv_ray_wor;
 	XMStoreFloat4(&inv_ray_wor, XMVector4Transform(rayEyeVec, viewMatInv));
 	XMFLOAT3 ray_wor = XMFLOAT3(inv_ray_wor.x, inv_ray_wor.y, inv_ray_wor.z);
