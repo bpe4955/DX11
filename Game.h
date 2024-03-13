@@ -58,7 +58,7 @@ private:
 	std::shared_ptr<SimplePixelShader> ps2;
 
 
-	DirectX::XMFLOAT3 rayCast(float xpos, float ypos);
+	DirectX::XMFLOAT3 MouseRayCast();
 
 };
 

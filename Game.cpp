@@ -258,7 +258,7 @@ void Game::Update(float deltaTime, float totalTime)
 
 	//Move SpotLight
 	spotLight.Position = cameras[cameraIndex]->GetPosition();
-	XMFLOAT3 mouseDir = rayCast((float)input.GetMouseX(), (float)input.GetMouseY());
+	XMFLOAT3 mouseDir = MouseRayCast();
 	spotLight.Direction = mouseDir;
 
 	ps2->SetData("spotLight",
@@ -486,13 +486,20 @@ void Game::BuildUI()
 	ImGui::End();
 }
 
-// https://stackoverflow.com/questions/71731722/correct-way-to-generate-3d-world-ray-from-2d-mouse-coordinates
-DirectX::XMFLOAT3 Game::rayCast(float xpos, float ypos)
+/// <summary>
+/// Gets an approximation of a direction vector to the mouse position.
+/// Derived from this code on stackoverflow: https://stackoverflow.com/questions/71731722/correct-way-to-generate-3d-world-ray-from-2d-mouse-coordinates
+/// </summary>
+/// <returns>An approximated direction vector, derived from the mouse's screen position</returns>
+DirectX::XMFLOAT3 Game::MouseRayCast()
 {
+	Input& input = Input::GetInstance();
+	float xpos = (float)input.GetMouseX();
+	float ypos = (float)input.GetMouseY();
+
 	// converts a position from the 2d xpos, ypos to a normalized 3d direction
 	float x = (2.0f * xpos) / windowWidth - 1.0f;
 	float y = 1.0f - (2.0f * ypos) / windowHeight;
-	// or (2.0f * ypos) / SCR_HEIGHT - 1.0f; depending on how you calculate ypos/lastY
 	float z = 1.0f;
 	XMFLOAT3 ray_nds = XMFLOAT3(x, y, z);
 	XMFLOAT4 ray_clip = XMFLOAT4(ray_nds.x, ray_nds.y, ray_nds.z, 1.0f);
