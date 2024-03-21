@@ -27,7 +27,13 @@ cbuffer lightData : register(b0)
     int numLights;
     float3 cameraPosition;
     float3 ambient;
+    bool hasSpecMap;
 }
+
+// Textures
+Texture2D SurfaceTexture : register(t0);
+Texture2D SpecularMap : register(t1);
+SamplerState Sampler : register(s0);
 
 // Move this to a "Helper.hlsli"
 float random(float2 s)
@@ -69,51 +75,80 @@ float Phong(float3 normal, float3 lightDir, float3 viewVector, float specularPow
 }
 
 
-float3 DirectionalLight(float3 normal, Light light, float3 viewVector, float specularPower)
+float3 DirectionalLight(float3 normal, Light light, float3 viewVector, float specularPower, float3 surfaceColor, float specScale)
 {
     float3 normLightDir = normalize(light.Direction);
     float diffuse = Lambert(normal, normLightDir);
-    float specular = Phong(normal, normLightDir, viewVector, specularPower);
+    float specular = Phong(normal, normLightDir, viewVector, specularPower) * specScale;
     
-    return light.Intensity * (diffuse + specular) * light.Color;
+    return light.Intensity * (diffuse * surfaceColor + specular) * light.Color;
 }
 
-float3 PointLight(float3 normal, Light light, float3 viewVector, float specularPower, float3 worldPosition)
+float3 PointLight(float3 normal, Light light, float3 viewVector, float specularPower, float3 worldPosition, float3 surfaceColor, float specScale)
 {
     float3 normLightDir = normalize(worldPosition - light.Position);
     float diffuse = Lambert(normal, normLightDir);
-    float specular = Phong(normal, normLightDir, viewVector, specularPower);
+    float specular = Phong(normal, normLightDir, viewVector, specularPower) * specScale;
     
-    return light.Intensity * (diffuse + specular) * Attenuate(light, worldPosition) * light.Color;
+    return light.Intensity * (diffuse * surfaceColor + specular) * Attenuate(light, worldPosition) * light.Color;
 }
 
-float3 SpotLight(float3 normal, Light light, float3 viewVector, float specularPower, float3 worldPosition)
+float3 SpotLight(float3 normal, Light light, float3 viewVector, float specularPower, float3 worldPosition, float3 surfaceColor, float specScale)
 {
     float3 normLightDir = normalize(light.Direction);
     float diffuse = Lambert(normal, normLightDir);
-    float specular = Phong(normal, normLightDir, viewVector, specularPower);
+    float specular = Phong(normal, normLightDir, viewVector, specularPower) * specScale;
     
-    return light.Intensity * (diffuse + specular) * Attenuate(light, worldPosition) * ConeAttenuate(normLightDir, light, worldPosition) * light.Color;
+    return light.Intensity * (diffuse * surfaceColor + specular) * Attenuate(light, worldPosition) * ConeAttenuate(normLightDir, light, worldPosition) * light.Color;
 }
 
-float3 totalLight(float3 _normal, float3 worldPosition)
+// When getting spotlight calculations outside of totalLight
+float3 SpotLight(float3 normal, Light light, float3 viewVector, float specularPower, float3 worldPosition, float2 uv)
 {
+    float3 surfaceColor = SurfaceTexture.Sample(Sampler, uv).rgb * colorTint.rbg;
+    float specScale;
+    if (!hasSpecMap)
+    {
+        specScale = 1.0f;
+    }
+    else
+    {
+        specScale = SpecularMap.Sample(Sampler, uv).r;
+    }
+    
+    float3 normLightDir = normalize(light.Direction);
+    float diffuse = Lambert(normal, normLightDir);
+    float specular = Phong(normal, normLightDir, viewVector, specularPower) * specScale;
+    
+    return light.Intensity * (diffuse * surfaceColor + specular) * Attenuate(light, worldPosition) * ConeAttenuate(normLightDir, light, worldPosition) * light.Color;
+}
+
+float3 totalLight(float3 _normal, float3 worldPosition, float2 uv)
+{
+    float3 surfaceColor = SurfaceTexture.Sample(Sampler, uv).rgb * colorTint.rbg;
+    float specScale;
+    if(!hasSpecMap) {specScale = 1.0f; }
+    else
+    {
+        specScale = SpecularMap.Sample(Sampler, uv).r;
+    }
+    
     float3 normal = normalize(_normal);
     float3 viewVector = normalize(cameraPosition - worldPosition);
-    float3 totalLight = ambient;
+    float3 totalLight = ambient * surfaceColor;
     float specularPower = (1.0f - roughness) * MAX_SPECULAR_EXPONENT;
     for (int i = 0; i < numLights; i++)
     {
         switch (lights[i].Type)
         {
             case LIGHT_TYPE_DIR:
-                totalLight += DirectionalLight(normal, lights[i], viewVector, specularPower);
+                totalLight += DirectionalLight(normal, lights[i], viewVector, specularPower, surfaceColor, specScale);
                 break;
             case LIGHT_TYPE_POINT:
-                totalLight += PointLight(normal, lights[i], viewVector, specularPower, worldPosition);
+                totalLight += PointLight(normal, lights[i], viewVector, specularPower, worldPosition, surfaceColor, specScale);
                 break;
             case LIGHT_TYPE_SPOT:
-                totalLight += SpotLight(normal, lights[i], viewVector, specularPower, worldPosition);
+                totalLight += SpotLight(normal, lights[i], viewVector, specularPower, worldPosition, surfaceColor, specScale);
                 break;
         }
     }

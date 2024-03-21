@@ -123,17 +123,40 @@ void Game::Init()
 // --------------------------------------------------------
 void Game::LoadShaders()
 {
-	ps = std::make_shared<SimplePixelShader>(device, context, FixPath(L"PixelShader.cso").c_str());
+	//ps = std::make_shared<SimplePixelShader>(device, context, FixPath(L"PixelShader.cso").c_str());
 	ps2 = std::make_shared<SimplePixelShader>(device, context, FixPath(L"CustomPS.cso").c_str());
 	vs = std::make_shared<SimpleVertexShader>(device, context, FixPath(L"VertexShader.cso").c_str());
 }
 
+
 void Game::CreateMaterials()
 {
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps));
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps));
+	// Create Sampler State
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; 
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;		
+	samplerDesc.MaxAnisotropy = 16;		// Can make this a "Graphics Setting"
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	device->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf());
+	
+	// Load Textures
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tilesTex;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tilesSpec;
+
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/tiles.png").c_str(), nullptr, tilesTex.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/tiles_specular.png").c_str(), nullptr, tilesSpec.GetAddressOf());
+
+	// Create Materials
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps2));
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps2));
+	materials.back().get()->AddSampler("Sampler", samplerState);
+	materials.back().get()->AddTextureSRV("SurfaceTexture", tilesTex);
+	materials.back().get()->AddTextureSRV("SpecularMap", tilesSpec);
+	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps2));
+	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps));
+	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps));
 }
 
 void Game::CreateLights()
@@ -173,17 +196,17 @@ void Game::CreateLights()
 	lights[lights.size()-1].Color = XMFLOAT3(1.0f, 0.2f, 1.0f); // Magenta
 	lights[lights.size()-1].Intensity = 0.7f;
 
-	ps->SetData("lights",
-		&lights[0],
-		sizeof(Light)*MAX_NUM_LIGHTS);
+	//ps->SetData("lights",
+	//	&lights[0],
+	//	sizeof(Light)*MAX_NUM_LIGHTS);
 	ps2->SetData("lights",
 		&lights[0],
 		sizeof(Light) * MAX_NUM_LIGHTS);
 
 	int numLights = (int)lights.size();
-	ps->SetData("numLights",
-		&numLights,
-		sizeof(int));
+	//ps->SetData("numLights",
+	//	&numLights,
+	//	sizeof(int));
 	ps2->SetData("numLights",
 		&numLights,
 		sizeof(int));
@@ -197,9 +220,10 @@ void Game::CreateGeometry()
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cheburashka.obj").c_str(), context, device));
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/sphere.obj").c_str(), context, device));
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), context, device)); 
-	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cheburashka.obj").c_str(), context, device));
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/N square.obj").c_str(), context, device));
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/yoshi.obj").c_str(), context, device));
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cheburashka.obj").c_str(), context, device));
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/Brian_Quest64.obj").c_str(), context, device));
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/flower.dae").c_str(), context, device));
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/Pikachu (Gigantamax).dae").c_str(), context, device));
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/Pikachu (Gigantamax).fbx").c_str(), context, device));
@@ -213,10 +237,12 @@ void Game::CreateGeometry()
 	// Create Entities
 	for (size_t i = 0; i < meshes.size(); i++)
 	{
-		entities.push_back(Entity(meshes[i], materials[i % 2]));
-		entities[i * 2].GetTransform()->SetPosition(XMFLOAT3(-3.0f*(1+i), 0.0f, 0.0f));
-		entities.push_back(Entity(meshes[i], materials[i%2 + 2]));
-		entities[i * 2 + 1].GetTransform()->SetPosition(XMFLOAT3(3.0f * (1 + i), 0.0f, 0.0f));
+		//entities.push_back(Entity(meshes[i], materials[i % 2]));
+		//entities[i * 2].GetTransform()->SetPosition(XMFLOAT3(-3.0f*(1+i), 0.0f, 0.0f));
+		//entities.push_back(Entity(meshes[i], materials[i%2 + 2]));
+		//entities[i * 2 + 1].GetTransform()->SetPosition(XMFLOAT3(3.0f * (1 + i), 0.0f, 0.0f));
+		entities.push_back(Entity(meshes[i], materials[0]));
+		entities[i].GetTransform()->SetPosition(XMFLOAT3(3.0f * (1 + i), 0.0f, 0.0f));
 	}
 	
 }
@@ -250,10 +276,9 @@ void Game::Update(float deltaTime, float totalTime)
 	cameras[cameraIndex]->Update(deltaTime);
 
 	//Move Entities
-	for (size_t i = 0; i < entities.size(); i += 2)
+	for (size_t i = 0; i < entities.size(); i ++)
 	{
-		entities[i].GetTransform()->Rotate(0, 0, deltaTime);
-		entities[i+1].GetTransform()->SetPosition((float)sin(totalTime) + i * 1.1f, 0, 0);
+		//entities[i].GetTransform()->SetPosition((float)sin(totalTime) + i * 2.5f, 0, 0);
 	}
 
 	//Move SpotLight
@@ -289,13 +314,13 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// DRAW entities
 	// Loop through shaders and set universal data
-	if (ps->HasVariable("totalTime")) { ps->SetFloat("totalTime", totalTime); }
+	//if (ps->HasVariable("totalTime")) { ps->SetFloat("totalTime", totalTime); }
 	if (ps2->HasVariable("totalTime")) { ps2->SetFloat("totalTime", totalTime); }
 	XMFLOAT3 ambientColor = XMFLOAT3(uiColor.x * BRIGHTNESS, uiColor.y * BRIGHTNESS, uiColor.z * BRIGHTNESS);
-	if (ps->HasVariable("ambient")) { ps->SetFloat3("ambient", ambientColor); }
+	//if (ps->HasVariable("ambient")) { ps->SetFloat3("ambient", ambientColor); }
 	if (ps2->HasVariable("ambient")) { ps2->SetFloat3("ambient", ambientColor); }
 		
-	for (size_t i = 1; i < entities.size(); i+=2)
+	for (size_t i = 1; i < entities.size(); i++)
 	{
 		entities[i].Draw(context, cameras[cameraIndex]);
 	}
@@ -472,9 +497,9 @@ void Game::BuildUI()
 			// Edit color of each light
 			if (ImGui::ColorEdit3(buf, &lights[i].Color.x))
 			{
-				ps->SetData("lights",
-					&lights[0],
-					sizeof(Light) * MAX_NUM_LIGHTS);
+				//ps->SetData("lights",
+				//	&lights[0],
+				//	sizeof(Light) * MAX_NUM_LIGHTS);
 				ps2->SetData("lights",
 					&lights[0],
 					sizeof(Light) * MAX_NUM_LIGHTS);

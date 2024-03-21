@@ -12,6 +12,7 @@
 #include "SimpleShader.h"
 #include "Material.h"
 #include "Light.h"
+#include "WICTextureLoader.h"
 
 
 class Game 
@@ -54,7 +55,7 @@ private:
 
 	// Simple Shaders
 	std::shared_ptr<SimpleVertexShader> vs;
-	std::shared_ptr<SimplePixelShader> ps;
+	//std::shared_ptr<SimplePixelShader> ps;
 	std::shared_ptr<SimplePixelShader> ps2;
 
 

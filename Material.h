@@ -2,6 +2,9 @@
 #include <DirectXMath.h>
 #include <memory>
 #include "SimpleShader.h"
+#include <string>
+#include "Transform.h"
+#include "Camera.h"
 class Material
 {
 public:
@@ -21,11 +24,20 @@ public:
 	void SetRoughness(float _roughness);
 	void SetVertShader(std::shared_ptr<SimpleVertexShader> _vertShader);
 	void SetPixelShader(std::shared_ptr<SimplePixelShader> _pixelShader);
+	void AddTextureSRV(std::string shaderVariableName, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv);
+	void AddSampler(std::string samplerVariableName, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler);
+
+	// Function
+	void PrepareMaterial(Transform* transform, std::shared_ptr<Camera> camera);
 
 private:
 	DirectX::XMFLOAT4 colorTint;
 	float roughness;
 	std::shared_ptr<SimpleVertexShader> vertShader;
 	std::shared_ptr<SimplePixelShader> pixelShader;
+
+	// Textures
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> textureSRVs;
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>> samplers;
 };
 
