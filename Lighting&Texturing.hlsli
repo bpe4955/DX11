@@ -19,7 +19,7 @@ struct Light
     float3 Padding;
 };
 
-cbuffer lightData : register(b0)
+cbuffer lightTexData : register(b0)
 {
     float4 colorTint;
     float roughness;
@@ -28,11 +28,13 @@ cbuffer lightData : register(b0)
     float3 cameraPosition;
     float3 ambient;
     bool hasSpecMap;
+    bool hasMask;
 }
 
 // Textures
 Texture2D SurfaceTexture : register(t0);
 Texture2D SpecularMap : register(t1);
+Texture2D TextureMask : register(t2);
 SamplerState Sampler : register(s0);
 
 // Move this to a "Helper.hlsli"
@@ -116,6 +118,15 @@ float3 SpotLight(float3 normal, Light light, float3 viewVector, float specularPo
     {
         specScale = SpecularMap.Sample(Sampler, uv).r;
     }
+    float3 mask;
+    if (!hasMask)
+    {
+        mask = float3(1.0f, 1.0f, 1.0f);
+    }
+    else
+    {
+        specScale = TextureMask.Sample(Sampler, uv).rgb;
+    }
     
     float3 normLightDir = normalize(light.Direction);
     float diffuse = Lambert(normal, normLightDir);
@@ -132,6 +143,12 @@ float3 totalLight(float3 _normal, float3 worldPosition, float2 uv)
     else
     {
         specScale = SpecularMap.Sample(Sampler, uv).r;
+    }
+    float3 mask;
+    if(hasMask)
+    {
+        mask = TextureMask.Sample(Sampler, uv).rgb;
+        surfaceColor *= mask;
     }
     
     float3 normal = normalize(_normal);

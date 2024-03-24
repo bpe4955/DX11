@@ -1,5 +1,5 @@
 #include "ShaderIncludes.hlsli"
-#include "Lighting.hlsli"
+#include "Lighting&Texturing.hlsli"
 
 /// <summary>
 /// Layout of our constant buffer

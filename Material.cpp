@@ -62,6 +62,8 @@ void Material::PrepareMaterial(Transform* transform, std::shared_ptr<Camera> cam
 	pixelShader->SetFloat4("colorTint", colorTint);
 	bool hasSpecMap = textureSRVs.count("SpecularMap") != 0;
 	pixelShader->SetData("hasSpecMap", &hasSpecMap, sizeof(bool));
+	bool hasMask = textureSRVs.count("TextureMask") != 0;
+	pixelShader->SetData("hasMask", &hasMask, sizeof(bool));
 	pixelShader->SetFloat("roughness", roughness);
 
 	for (auto& t : textureSRVs) { pixelShader->SetShaderResourceView(t.first.c_str(), t.second); }

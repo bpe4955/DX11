@@ -156,7 +156,7 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="packages.config" />
-    <None Include="Lighting.hlsli">
+    <None Include="Lighting&amp;Texturing.hlsli">
       <Filter>Shaders</Filter>
     </None>
     <None Include="vcpkg.json" />

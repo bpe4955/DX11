@@ -144,10 +144,12 @@ void Game::CreateMaterials()
 	// Load Textures
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tilesTex;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tilesSpec;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> crackedMask;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> questTex;
 
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/tiles.png").c_str(), nullptr, tilesTex.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/tiles_specular.png").c_str(), nullptr, tilesSpec.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/MaskCracked.jpg").c_str(), nullptr, crackedMask.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/Brian_Quest64.png").c_str(), nullptr, questTex.GetAddressOf());
 
 	// Create Materials
@@ -161,6 +163,7 @@ void Game::CreateMaterials()
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, vs, ps2));
 	materials.back().get()->AddSampler("Sampler", samplerState);
 	materials.back().get()->AddTextureSRV("SurfaceTexture", questTex);
+	materials.back().get()->AddTextureSRV("TextureMask", crackedMask);
 }
 
 void Game::CreateLights()
