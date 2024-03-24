@@ -72,14 +72,15 @@ float Lambert(float3 normal, float3 lightDir)
 
 float Phong(float3 normal, float3 lightDir, float3 viewVector, float specularPower)
 {
-    if (specularPower == 0)
+    float ret = 0.0f;
+    if (specularPower != 0)
     {
-        return 0.0f;
-    }
     // Reflection of the Light coming off the surface
-    float3 refl = reflect(lightDir, normal);
+        float3 refl = reflect(lightDir, normal);
     // Get the angle between the view and reflection, saturate, raise to power
-    return pow(saturate(dot(viewVector, refl)), specularPower);
+        ret = pow(saturate(dot(viewVector, refl)), specularPower);
+    }
+    return ret;
 }
 
 
