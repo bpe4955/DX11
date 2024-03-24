@@ -27,6 +27,8 @@ cbuffer lightTexData : register(b0)
     int numLights;
     float3 cameraPosition;
     float3 ambient;
+    float2 uvOffset;
+    float2 uvScale;
     bool hasSpecMap;
     bool hasMask;
 }
@@ -70,7 +72,10 @@ float Lambert(float3 normal, float3 lightDir)
 
 float Phong(float3 normal, float3 lightDir, float3 viewVector, float specularPower)
 {
-    if(specularPower == 0) { return 0.0f; }
+    if (specularPower == 0)
+    {
+        return 0.0f;
+    }
     // Reflection of the Light coming off the surface
     float3 refl = reflect(lightDir, normal);
     // Get the angle between the view and reflection, saturate, raise to power
@@ -108,6 +113,9 @@ float3 SpotLight(float3 normal, Light light, float3 viewVector, float specularPo
 // When getting spotlight calculations outside of totalLight
 float3 SpotLight(float3 normal, Light light, float3 viewVector, float specularPower, float3 worldPosition, float2 uv)
 {
+    // Texturing
+    uv += uvOffset;
+    uv *= uvScale;
     float3 surfaceColor = SurfaceTexture.Sample(Sampler, uv).rgb * colorTint.rbg;
     float specScale;
     if (!hasSpecMap)
@@ -119,15 +127,12 @@ float3 SpotLight(float3 normal, Light light, float3 viewVector, float specularPo
         specScale = SpecularMap.Sample(Sampler, uv).r;
     }
     float3 mask;
-    if (!hasMask)
+    if (hasMask)
     {
-        mask = float3(1.0f, 1.0f, 1.0f);
+        mask = TextureMask.Sample(Sampler, uv).rgb;
+        surfaceColor *= mask;
     }
-    else
-    {
-        specScale = TextureMask.Sample(Sampler, uv).rgb;
-    }
-    
+    // Lighting
     float3 normLightDir = normalize(light.Direction);
     float diffuse = Lambert(normal, normLightDir);
     float specular = Phong(normal, normLightDir, viewVector, specularPower) * specScale;
@@ -137,20 +142,26 @@ float3 SpotLight(float3 normal, Light light, float3 viewVector, float specularPo
 
 float3 totalLight(float3 _normal, float3 worldPosition, float2 uv)
 {
+    // Texturing
+    uv += uvOffset;
+    uv *= uvScale;
     float3 surfaceColor = SurfaceTexture.Sample(Sampler, uv).rgb * colorTint.rbg;
     float specScale;
-    if(!hasSpecMap) {specScale = 1.0f; }
+    if (!hasSpecMap)
+    {
+        specScale = 1.0f;
+    }
     else
     {
         specScale = SpecularMap.Sample(Sampler, uv).r;
     }
     float3 mask;
-    if(hasMask)
+    if (hasMask)
     {
         mask = TextureMask.Sample(Sampler, uv).rgb;
         surfaceColor *= mask;
     }
-    
+    // Lighting
     float3 normal = normalize(_normal);
     float3 viewVector = normalize(cameraPosition - worldPosition);
     float3 totalLight = ambient * surfaceColor;

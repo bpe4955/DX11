@@ -10,6 +10,8 @@ Material::Material(DirectX::XMFLOAT4 _colorTint, float _roughness,
 {
 	if (roughness < 0.0f) { roughness = 0.0f; }
 	else if (roughness > 1.0f) { roughness = 1.0f; }
+	uvOffset = DirectX::XMFLOAT2(0.0f, 0.0f);
+	uvScale = DirectX::XMFLOAT2(1.0f, 1.0f);
 }
 
 // Getters
@@ -27,6 +29,9 @@ void Material::SetRoughness(float _roughness) {
 ; }
 void Material::SetVertShader(std::shared_ptr<SimpleVertexShader> _vertShader) { vertShader = _vertShader; }
 void Material::SetPixelShader(std::shared_ptr<SimplePixelShader> _pixelShader) { pixelShader = _pixelShader; }
+void Material::SetUVOffset(DirectX::XMFLOAT2 _uvOffset) { uvOffset = _uvOffset; }
+void Material::AddUVOffset(DirectX::XMFLOAT2 _uvOffset) { uvOffset = DirectX::XMFLOAT2(uvOffset.x + _uvOffset.x, uvOffset.y + _uvOffset.y); }
+void Material::SetUVScale(DirectX::XMFLOAT2 _uvScale) { uvScale = _uvScale; }
 void Material::AddTextureSRV(std::string shaderVariableName, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv) 
 {
 	textureSRVs.insert({ shaderVariableName, srv });
@@ -65,6 +70,8 @@ void Material::PrepareMaterial(Transform* transform, std::shared_ptr<Camera> cam
 	bool hasMask = textureSRVs.count("TextureMask") != 0;
 	pixelShader->SetData("hasMask", &hasMask, sizeof(bool));
 	pixelShader->SetFloat("roughness", roughness);
+	pixelShader->SetFloat2("uvOffset", uvOffset);
+	pixelShader->SetFloat2("uvScale", uvScale);
 
 	for (auto& t : textureSRVs) { pixelShader->SetShaderResourceView(t.first.c_str(), t.second); }
 	for (auto& s : samplers) { pixelShader->SetSamplerState(s.first.c_str(), s.second); }

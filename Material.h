@@ -24,6 +24,9 @@ public:
 	void SetRoughness(float _roughness);
 	void SetVertShader(std::shared_ptr<SimpleVertexShader> _vertShader);
 	void SetPixelShader(std::shared_ptr<SimplePixelShader> _pixelShader);
+	void SetUVOffset(DirectX::XMFLOAT2 _uvOffset);
+	void AddUVOffset(DirectX::XMFLOAT2 _uvOffset);
+	void SetUVScale(DirectX::XMFLOAT2  _uvScale);
 	void AddTextureSRV(std::string shaderVariableName, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv);
 	void AddSampler(std::string samplerVariableName, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler);
 
@@ -37,6 +40,8 @@ private:
 	std::shared_ptr<SimplePixelShader> pixelShader;
 
 	// Textures
+	DirectX::XMFLOAT2 uvOffset;
+	DirectX::XMFLOAT2 uvScale;
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> textureSRVs;
 	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11SamplerState>> samplers;
 };

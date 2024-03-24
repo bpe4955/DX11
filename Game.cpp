@@ -157,13 +157,17 @@ void Game::CreateMaterials()
 	materials.back().get()->AddSampler("Sampler", samplerState);
 	materials.back().get()->AddTextureSRV("SurfaceTexture", tilesTex);
 	materials.back().get()->AddTextureSRV("SpecularMap", tilesSpec);
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps2));
+	materials.back().get()->AddSampler("Sampler", samplerState);
+	materials.back().get()->AddTextureSRV("SurfaceTexture", tilesTex);
+	materials.back().get()->AddTextureSRV("SpecularMap", tilesSpec);
+	materials.back().get()->AddTextureSRV("TextureMask", crackedMask);
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps2));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps));
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, vs, ps2));
 	materials.back().get()->AddSampler("Sampler", samplerState);
 	materials.back().get()->AddTextureSRV("SurfaceTexture", questTex);
-	materials.back().get()->AddTextureSRV("TextureMask", crackedMask);
 }
 
 void Game::CreateLights()
@@ -251,6 +255,8 @@ void Game::CreateGeometry()
 		entities.push_back(Entity(meshes[i], materials[0]));
 		entities[i].GetTransform()->SetPosition(XMFLOAT3(-3.0f * (i), 0.0f, 0.0f));
 	}
+	entities[0].SetMaterial(materials[1]);
+	entities[0].GetMaterial()->SetUVScale(XMFLOAT2(1.0f, 0.5f));
 	entities.back().SetMaterial(materials.back());
 	
 }
@@ -288,6 +294,9 @@ void Game::Update(float deltaTime, float totalTime)
 	{
 		//entities[i].GetTransform()->SetPosition((float)sin(totalTime) - i * 2.5f, 0, 0);
 	}
+
+	// Update cube UVs
+	entities[0].GetMaterial()->AddUVOffset(XMFLOAT2(deltaTime, 0.0f));
 
 	//Move SpotLight
 	spotLight.Position = cameras[cameraIndex]->GetPosition();
@@ -328,7 +337,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	//if (ps->HasVariable("ambient")) { ps->SetFloat3("ambient", ambientColor); }
 	if (ps2->HasVariable("ambient")) { ps2->SetFloat3("ambient", ambientColor); }
 		
-	for (size_t i = 1; i < entities.size(); i++)
+	for (size_t i = 0; i < entities.size(); i++)
 	{
 		entities[i].Draw(context, cameras[cameraIndex]);
 	}
