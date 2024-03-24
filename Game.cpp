@@ -97,12 +97,11 @@ void Game::Init()
 	// Create Cameras
 	cameraIndex = 0;
 	cameras.push_back(std::make_shared<Camera>(
-		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, 5.0f)));
+		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -10.0f)));
 	cameras.push_back(std::make_shared<Camera>(
-		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, 10.0f)));
+		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -10.0f)));
 	cameras[1]->UpdateProjMatrix(false, (float)windowWidth, (float)windowHeight);
 	cameras[1]->SetMouseSens(0.005f);
-
 	// Rasterizer state
 	D3D11_RASTERIZER_DESC rd = {};
 	rd.CullMode = D3D11_CULL_NONE;
@@ -145,9 +144,11 @@ void Game::CreateMaterials()
 	// Load Textures
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tilesTex;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tilesSpec;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> questTex;
 
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/tiles.png").c_str(), nullptr, tilesTex.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/tiles_specular.png").c_str(), nullptr, tilesSpec.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/Brian_Quest64.png").c_str(), nullptr, questTex.GetAddressOf());
 
 	// Create Materials
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps2));
@@ -157,6 +158,9 @@ void Game::CreateMaterials()
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps2));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, vs, ps2));
+	materials.back().get()->AddSampler("Sampler", samplerState);
+	materials.back().get()->AddTextureSRV("SurfaceTexture", questTex);
 }
 
 void Game::CreateLights()
@@ -242,8 +246,9 @@ void Game::CreateGeometry()
 		//entities.push_back(Entity(meshes[i], materials[i%2 + 2]));
 		//entities[i * 2 + 1].GetTransform()->SetPosition(XMFLOAT3(3.0f * (1 + i), 0.0f, 0.0f));
 		entities.push_back(Entity(meshes[i], materials[0]));
-		entities[i].GetTransform()->SetPosition(XMFLOAT3(3.0f * (1 + i), 0.0f, 0.0f));
+		entities[i].GetTransform()->SetPosition(XMFLOAT3(-3.0f * (i), 0.0f, 0.0f));
 	}
+	entities.back().SetMaterial(materials.back());
 	
 }
 
@@ -278,7 +283,7 @@ void Game::Update(float deltaTime, float totalTime)
 	//Move Entities
 	for (size_t i = 0; i < entities.size(); i ++)
 	{
-		//entities[i].GetTransform()->SetPosition((float)sin(totalTime) + i * 2.5f, 0, 0);
+		//entities[i].GetTransform()->SetPosition((float)sin(totalTime) - i * 2.5f, 0, 0);
 	}
 
 	//Move SpotLight

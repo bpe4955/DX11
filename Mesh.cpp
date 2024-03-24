@@ -76,7 +76,8 @@ int Mesh::GetVertexCount() { return vertexCount; }
 // Helper Functions
 void Mesh::LoadModelAssimp(std::string fileName) 
 {
-	const aiScene* scene = aiImportFile(fileName.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
+	const aiScene* scene = aiImportFile(fileName.c_str(), aiProcessPreset_TargetRealtime_MaxQuality |
+		aiProcess_ConvertToLeftHanded );
 
 	if (!scene) {
 		std::cerr << "Could not load file " << fileName << ": " << aiGetErrorString() << std::endl;
