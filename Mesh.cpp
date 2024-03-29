@@ -131,11 +131,6 @@ void Mesh::LoadModelAssimp(std::string fileName)
 					v.Tangent.x = tan.x;
 					v.Tangent.y = tan.y;
 					v.Tangent.z = tan.z;
-
-					aiVector3D bitan = readMesh->mBitangents[i];
-					v.Bitangent.x = tan.x;
-					v.Bitangent.y = tan.y;
-					v.Bitangent.z = tan.z;
 				}
 
 				vertices.push_back(v);

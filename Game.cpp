@@ -145,23 +145,30 @@ void Game::CreateMaterials()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tilesTex;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> tilesSpec;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> crackedMask;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cushionTex;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cushionNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockTex;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rockNormal;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> questTex;
 
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/tiles.png").c_str(), nullptr, tilesTex.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/tiles_specular.png").c_str(), nullptr, tilesSpec.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/MaskCracked.jpg").c_str(), nullptr, crackedMask.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/cushion.png").c_str(), nullptr, cushionTex.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/cushion_normals.png").c_str(), nullptr, cushionNormal.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/rock.png").c_str(), nullptr, rockTex.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/rock_normals.png").c_str(), nullptr, rockNormal.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/Brian_Quest64.png").c_str(), nullptr, questTex.GetAddressOf());
 
 	// Create Materials
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps2));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, ps2));
 	materials.back().get()->AddSampler("Sampler", samplerState);
-	materials.back().get()->AddTextureSRV("SurfaceTexture", tilesTex);
-	materials.back().get()->AddTextureSRV("SpecularMap", tilesSpec);
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps2));
+	materials.back().get()->AddTextureSRV("SurfaceTexture", rockTex);
+	materials.back().get()->AddTextureSRV("NormalMap", rockNormal);
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.9f, vs, ps2));
 	materials.back().get()->AddSampler("Sampler", samplerState);
-	materials.back().get()->AddTextureSRV("SurfaceTexture", tilesTex);
-	materials.back().get()->AddTextureSRV("SpecularMap", tilesSpec);
-	materials.back().get()->AddTextureSRV("TextureMask", crackedMask);
+	materials.back().get()->AddTextureSRV("SurfaceTexture", cushionTex);
+	materials.back().get()->AddTextureSRV("NormalMap", cushionNormal);
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps2));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps));
@@ -252,11 +259,10 @@ void Game::CreateGeometry()
 		//entities[i * 2].GetTransform()->SetPosition(XMFLOAT3(-3.0f*(1+i), 0.0f, 0.0f));
 		//entities.push_back(Entity(meshes[i], materials[i%2 + 2]));
 		//entities[i * 2 + 1].GetTransform()->SetPosition(XMFLOAT3(3.0f * (1 + i), 0.0f, 0.0f));
-		entities.push_back(Entity(meshes[i], materials[0]));
+		entities.push_back(Entity(meshes[i], materials[1]));
 		entities[i].GetTransform()->SetPosition(XMFLOAT3(-3.0f * (i), 0.0f, 0.0f));
 	}
-	entities[0].SetMaterial(materials[1]);
-	entities[0].GetMaterial()->SetUVScale(XMFLOAT2(1.0f, 0.5f));
+	entities[0].SetMaterial(materials[0]);
 	entities.back().SetMaterial(materials.back());
 	
 }
@@ -295,8 +301,6 @@ void Game::Update(float deltaTime, float totalTime)
 		//entities[i].GetTransform()->SetPosition((float)sin(totalTime) - i * 2.5f, 0, 0);
 	}
 
-	// Update cube UVs
-	entities[0].GetMaterial()->AddUVOffset(XMFLOAT2(deltaTime, 0.0f));
 
 	//Move SpotLight
 	spotLight.Position = cameras[cameraIndex]->GetPosition();

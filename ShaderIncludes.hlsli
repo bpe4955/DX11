@@ -17,7 +17,6 @@ struct VertexShaderInput
     float3 normal : NORMAL;
     float2 uv : TEXCOORD;
     float3 tangent : TANGENT;
-    float3 bitangent : BITANGENT;
 };
 
 // Struct representing the data we're sending down the pipeline
@@ -36,6 +35,7 @@ struct VertexToPixel
     float2 uv : TEXCOORD;
     float3 worldPosition : POSITION;
     float3 normal : NORMAL;
+    float3 tangent : TANGENT;
 };
 
 

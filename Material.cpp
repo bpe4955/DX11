@@ -69,6 +69,8 @@ void Material::PrepareMaterial(Transform* transform, std::shared_ptr<Camera> cam
 	pixelShader->SetData("hasSpecMap", &hasSpecMap, sizeof(bool));
 	bool hasMask = textureSRVs.count("TextureMask") != 0;
 	pixelShader->SetData("hasMask", &hasMask, sizeof(bool));
+	bool hasNormalMap = textureSRVs.count("NormalMap") != 0;
+	pixelShader->SetData("hasNormalMap", &hasNormalMap, sizeof(bool));
 	pixelShader->SetFloat("roughness", roughness);
 	pixelShader->SetFloat2("uvOffset", uvOffset);
 	pixelShader->SetFloat2("uvScale", uvScale);

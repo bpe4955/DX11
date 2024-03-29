@@ -29,5 +29,5 @@ float4 main(VertexToPixel input) : SV_TARGET
     float s = sin(dist / 10.0f);
     float3 mask = float3(x * s, y * s, s);
     
-    return float4(rgb * mask, 1) * colorTint * float4(totalLight(input.normal, input.worldPosition, input.uv), 1);
+    return float4(rgb * mask, 1) * colorTint * float4(totalLight(input.normal, input.worldPosition, input.uv, input.tangent), 1);
 }
