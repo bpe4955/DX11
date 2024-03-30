@@ -15,7 +15,7 @@ using namespace DirectX;
 
 //Variables
 const float RADTODEG = 57.2958f;
-XMFLOAT4 uiColor(0.4f, 0.6f, 0.75f, 1.0f); // Default Cornflower Blue
+XMFLOAT4 uiColor(1.0f, 1.0f, 1.0f, 1.0f); // Default Cornflower Blue
 bool demoWindowVisible = false;
 bool isFullscreen = false;
 const float BRIGHTNESS = 0.1f;
@@ -106,9 +106,9 @@ void Game::Init()
 	D3D11_RASTERIZER_DESC rd = {};
 	rd.CullMode = D3D11_CULL_NONE;
 	rd.FillMode = D3D11_FILL_SOLID;
-	device->CreateRasterizerState(&rd, testRastState.GetAddressOf());
+	device->CreateRasterizerState(&rd, rastState.GetAddressOf());
 
-	context->RSSetState(testRastState.Get());
+	context->RSSetState(rastState.Get());
 
 }
 
@@ -175,6 +175,13 @@ void Game::CreateMaterials()
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, vs, ps2));
 	materials.back().get()->AddSampler("Sampler", samplerState);
 	materials.back().get()->AddTextureSRV("SurfaceTexture", questTex);
+
+	// Create SkyBox
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), context, device));
+	skyBox = std::make_unique<Sky>(meshes.back(),
+		samplerState, device, context,
+		FixPath(L"../../Assets/Skies/Planet/").c_str());
+	skyBox->colorTint = uiColor;
 }
 
 void Game::CreateLights()
@@ -237,7 +244,6 @@ void Game::CreateGeometry()
 {
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cheburashka.obj").c_str(), context, device));
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/sphere.obj").c_str(), context, device));
-	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), context, device)); 
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/N square.obj").c_str(), context, device));
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/yoshi.obj").c_str(), context, device));
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cheburashka.obj").c_str(), context, device));
@@ -264,7 +270,6 @@ void Game::CreateGeometry()
 	}
 	entities[0].SetMaterial(materials[0]);
 	entities.back().SetMaterial(materials.back());
-	
 }
 
 
@@ -345,6 +350,10 @@ void Game::Draw(float deltaTime, float totalTime)
 	{
 		entities[i].Draw(context, cameras[cameraIndex]);
 	}
+
+	// DRAW Skybox
+	skyBox->colorTint = uiColor;
+	skyBox->Draw(context, cameras[cameraIndex], rastState);
 
 	// DRAW ImGUI
 	ImGui::Render(); // Turns this frame’s UI into renderable triangles

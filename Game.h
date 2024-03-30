@@ -13,6 +13,7 @@
 #include "Material.h"
 #include "Light.h"
 #include "WICTextureLoader.h"
+#include "Sky.h"
 
 
 class Game 
@@ -42,7 +43,7 @@ private:
 	// Camera
 	std::vector<std::shared_ptr<Camera>> cameras;
 	int cameraIndex;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState> testRastState;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rastState;
 
 	// Lights
 	Light spotLight;
@@ -52,6 +53,7 @@ private:
 	std::vector<std::shared_ptr<Mesh>> meshes;
 	std::vector<std::shared_ptr<Material>> materials;
 	std::vector<Entity> entities;
+	std::unique_ptr<Sky> skyBox;
 
 	// Simple Shaders
 	std::shared_ptr<SimpleVertexShader> vs;

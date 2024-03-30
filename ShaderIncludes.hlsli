@@ -38,6 +38,11 @@ struct VertexToPixel
     float3 tangent : TANGENT;
 };
 
+struct VertexToPixel_Sky
+{
+    float4 screenPosition : SV_POSITION;
+    float3 sampleDir : DIRECTION;
+};
 
 
 
