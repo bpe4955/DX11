@@ -18,7 +18,7 @@ const float RADTODEG = 57.2958f;
 XMFLOAT4 uiColor(1.0f, 1.0f, 1.0f, 1.0f); // Default Cornflower Blue
 bool demoWindowVisible = false;
 bool isFullscreen = false;
-const float BRIGHTNESS = 0.1f;
+float BRIGHTNESS = 0.1f;
 XMFLOAT3 ambientColor = XMFLOAT3(uiColor.x * BRIGHTNESS ,uiColor.y * BRIGHTNESS,uiColor.z * BRIGHTNESS) ;
 
 // --------------------------------------------------------
@@ -421,7 +421,6 @@ void Game::BuildUI()
 		else { ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Framerate: %f fps", fps); }
 		ImGui::Text("Frame Count: %d", ImGui::GetFrameCount());
 		ImGui::Text("Window Resolution: %dx%d", windowWidth, windowHeight);
-		ImGui::ColorEdit4("Background Color", &uiColor.x);
 		ImGui::Checkbox("ImGui Demo Window Visibility", &demoWindowVisible);
 		if (ImGui::Button(isFullscreen ? "Windowed" : "Fullscreen")) {
 			isFullscreen = !isFullscreen;
@@ -432,7 +431,6 @@ void Game::BuildUI()
 	}
 	if (ImGui::TreeNode("Additional Elements"))
 	{
-
 		ImGui::Text("Font Scaling");
 		ImGuiIO& io = ImGui::GetIO();
 		const float MIN_SCALE = 0.5f;
@@ -442,6 +440,34 @@ void Game::BuildUI()
 		if (ImGui::DragFloat("window scale", &window_scale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp)) // Scale only this window
 			ImGui::SetWindowFontScale(window_scale);
 		ImGui::DragFloat("global scale", &io.FontGlobalScale, 0.005f, MIN_SCALE, MAX_SCALE, "%.2f", ImGuiSliderFlags_AlwaysClamp); // Scale everything
+
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Lighting"))
+	{
+		ImGui::DragFloat("Brightness", &BRIGHTNESS, 0.0002f, 0.001f, 0.5f, "%.3f");
+		ImGui::ColorEdit4("Background Color", &uiColor.x);
+
+		if (ImGui::TreeNode("Scene Lights"))
+		{
+			ImGui::ColorEdit3("Spotlight Color", &spotLight.Color.x);
+			for (int i = 0; i < lights.size(); i++)
+			{
+				char buf[128];
+				sprintf_s(buf, "Light %i Color", i);
+				// Edit color of each light
+				if (ImGui::ColorEdit3(buf, &lights[i].Color.x))
+				{
+					//ps->SetData("lights",
+					//	&lights[0],
+					//	sizeof(Light) * MAX_NUM_LIGHTS);
+					ps2->SetData("lights",
+						&lights[0],
+						sizeof(Light) * MAX_NUM_LIGHTS);
+				}
+			}
+			ImGui::TreePop();
+		}
 
 		ImGui::TreePop();
 	}
@@ -515,26 +541,6 @@ void Game::BuildUI()
 			}
 		}
 
-		ImGui::TreePop();
-	}
-	if (ImGui::TreeNode("Scene Lights"))
-	{
-		ImGui::ColorEdit3("Spotlight Color", &spotLight.Color.x);
-		for (int i = 0; i < lights.size(); i++)
-		{
-			char buf[128];
-			sprintf_s(buf, "Light %i Color", i);
-			// Edit color of each light
-			if (ImGui::ColorEdit3(buf, &lights[i].Color.x))
-			{
-				//ps->SetData("lights",
-				//	&lights[0],
-				//	sizeof(Light) * MAX_NUM_LIGHTS);
-				ps2->SetData("lights",
-					&lights[0],
-					sizeof(Light) * MAX_NUM_LIGHTS);
-			}
-		}
 		ImGui::TreePop();
 	}
 
