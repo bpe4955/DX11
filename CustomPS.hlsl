@@ -26,7 +26,8 @@ float4 main(VertexToPixel input) : SV_TARGET
     float3 viewVector = normalize(cameraPosition - input.worldPosition);
     float specularPower = (1.0f - roughness) * MAX_SPECULAR_EXPONENT;
 	
-    return colorTint * float4(totalLight(normal, input.worldPosition, input.uv, tangent) + SpotLight(normal, spotLight, viewVector, specularPower, input.worldPosition, input.uv, tangent), 1);
-    
+
+	float4 totalColor = colorTint * float4(totalLight(normal, input.worldPosition, input.uv, tangent) + SpotLight(normal, spotLight, viewVector, specularPower, input.worldPosition, input.uv, tangent), 1);
+	return float4(pow(totalColor.rgb, 1.0f / 2.2f), totalColor.a);
 	//return float4(pulse.rrr+colorTint.xyz+xyz, 1) * float4(totalLight(input.normal, input.worldPosition), 1);
 }

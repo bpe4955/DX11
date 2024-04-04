@@ -159,7 +159,7 @@ float3 totalLight(float3 _normal, float3 worldPosition, float2 uv, float3 tangen
     // Texturing
     uv += uvOffset;
     uv *= uvScale;
-    float3 surfaceColor = SurfaceTexture.Sample(Sampler, uv).rgb * colorTint.rbg;
+    float3 surfaceColor = pow(SurfaceTexture.Sample(Sampler, uv).rgb, 2.2f) * colorTint.rbg;
     float specScale = 1.0f;
     if (hasSpecMap)
     {
