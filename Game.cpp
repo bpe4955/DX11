@@ -15,11 +15,15 @@ using namespace DirectX;
 
 //Variables
 const float RADTODEG = 57.2958f;
-XMFLOAT4 uiColor(1.0f, 1.0f, 1.0f, 1.0f); // Default Cornflower Blue
+XMFLOAT4 uiColor(1.0f, 1.0f, 1.0f, 1.0f);
+XMFLOAT4 skyColor(1.0f, 0.745f, 0.941f,1.0f); // Cloud Pink
+//XMFLOAT4 skyColor(0.8f, 0.8f, 0.8f, 1.0f); // Planet
 bool demoWindowVisible = false;
 bool isFullscreen = false;
-const float BRIGHTNESS = 0.1f;
-XMFLOAT3 ambientColor = XMFLOAT3(uiColor.x * BRIGHTNESS ,uiColor.y * BRIGHTNESS,uiColor.z * BRIGHTNESS) ;
+const float BRIGHTNESS = 0.05f;
+XMFLOAT3 ambientColor = XMFLOAT3(uiColor.x * skyColor.x * BRIGHTNESS,
+	uiColor.y * skyColor.y * BRIGHTNESS,
+	uiColor.z * skyColor.z * BRIGHTNESS);
 
 // --------------------------------------------------------
 // Constructor
@@ -182,6 +186,7 @@ void Game::CreateMaterials()
 		samplerState, device, context,
 		FixPath(L"../../Assets/Skies/Planet/").c_str());
 	skyBox->colorTint = uiColor;
+	materials[0]->AddTextureSRV("EnvironmentMap", skyBox->GetSkyTexture());
 }
 
 void Game::CreateLights()
@@ -339,10 +344,12 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 
 	// DRAW entities
+	XMFLOAT3 ambientColor = XMFLOAT3(uiColor.x * skyColor.x * BRIGHTNESS,
+		uiColor.y * skyColor.y * BRIGHTNESS,
+		uiColor.z * skyColor.z * BRIGHTNESS);
 	// Loop through shaders and set universal data
 	//if (ps->HasVariable("totalTime")) { ps->SetFloat("totalTime", totalTime); }
 	if (ps2->HasVariable("totalTime")) { ps2->SetFloat("totalTime", totalTime); }
-	XMFLOAT3 ambientColor = XMFLOAT3(uiColor.x * BRIGHTNESS, uiColor.y * BRIGHTNESS, uiColor.z * BRIGHTNESS);
 	//if (ps->HasVariable("ambient")) { ps->SetFloat3("ambient", ambientColor); }
 	if (ps2->HasVariable("ambient")) { ps2->SetFloat3("ambient", ambientColor); }
 		

@@ -30,6 +30,8 @@ public:
 	void Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::shared_ptr<Camera> camera,
 		Microsoft::WRL::ComPtr<ID3D11RasterizerState> _rasterizerState);
 
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSkyTexture();
+
 private:
 	// Variables
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampleState;

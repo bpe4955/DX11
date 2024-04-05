@@ -140,3 +140,8 @@ void Sky::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, std::shared_
 	context->RSSetState(_rasterizerState.Get());
 	context->OMSetDepthStencilState(0, 0);
 }
+
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Sky::GetSkyTexture()
+{
+	return skyTexture;
+}
