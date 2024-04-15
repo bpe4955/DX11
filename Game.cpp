@@ -127,7 +127,7 @@ void Game::Init()
 void Game::LoadShaders()
 {
 	//ps = std::make_shared<SimplePixelShader>(device, context, FixPath(L"PixelShader.cso").c_str());
-	ps2 = std::make_shared<SimplePixelShader>(device, context, FixPath(L"CustomPS.cso").c_str());
+	customPS = std::make_shared<SimplePixelShader>(device, context, FixPath(L"CustomPS.cso").c_str());
 	vs = std::make_shared<SimpleVertexShader>(device, context, FixPath(L"VertexShader.cso").c_str());
 }
 
@@ -165,18 +165,18 @@ void Game::CreateMaterials()
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/Brian_Quest64.png").c_str(), nullptr, questTex.GetAddressOf());
 
 	// Create Materials
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, ps2));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
 	materials.back().get()->AddSampler("Sampler", samplerState);
 	materials.back().get()->AddTextureSRV("SurfaceTexture", rockTex);
 	materials.back().get()->AddTextureSRV("NormalMap", rockNormal);
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.9f, vs, ps2));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.9f, vs, customPS));
 	materials.back().get()->AddSampler("Sampler", samplerState);
 	materials.back().get()->AddTextureSRV("SurfaceTexture", cushionTex);
 	materials.back().get()->AddTextureSRV("NormalMap", cushionNormal);
-	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps2));
+	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, customPS));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps));
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, vs, ps2));
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, vs, customPS));
 	materials.back().get()->AddSampler("Sampler", samplerState);
 	materials.back().get()->AddTextureSRV("SurfaceTexture", questTex);
 
@@ -186,7 +186,13 @@ void Game::CreateMaterials()
 		samplerState, device, context,
 		FixPath(L"../../Assets/Skies/Planet/").c_str());
 	skyBox->colorTint = uiColor;
-	materials[0]->AddTextureSRV("EnvironmentMap", skyBox->GetSkyTexture());
+
+	//auto skyTexture = skyBox->GetSkyTexture();
+	//customPS->SetData("EnvironmentMap", skyBox->GetSkyTexture().GetAddressOf(), sizeof(texture2d));
+	if (materials[0]->GetPixelShader()->HasShaderResourceView("EnvironmentMap"))
+	{
+		materials[0]->AddTextureSRV("EnvironmentMap", skyBox->GetSkyTexture());
+	}
 }
 
 void Game::CreateLights()
@@ -229,7 +235,7 @@ void Game::CreateLights()
 	//ps->SetData("lights",
 	//	&lights[0],
 	//	sizeof(Light)*MAX_NUM_LIGHTS);
-	ps2->SetData("lights",
+	customPS->SetData("lights",
 		&lights[0],
 		sizeof(Light) * MAX_NUM_LIGHTS);
 
@@ -237,7 +243,7 @@ void Game::CreateLights()
 	//ps->SetData("numLights",
 	//	&numLights,
 	//	sizeof(int));
-	ps2->SetData("numLights",
+	customPS->SetData("numLights",
 		&numLights,
 		sizeof(int));
 }
@@ -317,7 +323,7 @@ void Game::Update(float deltaTime, float totalTime)
 	XMFLOAT3 mouseDir = MouseRayCast();
 	spotLight.Direction = mouseDir;
 
-	ps2->SetData("spotLight",
+	customPS->SetData("spotLight",
 		&spotLight,
 		sizeof(Light));
 
@@ -349,9 +355,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		uiColor.z * skyColor.z * BRIGHTNESS);
 	// Loop through shaders and set universal data
 	//if (ps->HasVariable("totalTime")) { ps->SetFloat("totalTime", totalTime); }
-	if (ps2->HasVariable("totalTime")) { ps2->SetFloat("totalTime", totalTime); }
+	if (customPS->HasVariable("totalTime")) { customPS->SetFloat("totalTime", totalTime); }
 	//if (ps->HasVariable("ambient")) { ps->SetFloat3("ambient", ambientColor); }
-	if (ps2->HasVariable("ambient")) { ps2->SetFloat3("ambient", ambientColor); }
+	if (customPS->HasVariable("ambient")) { customPS->SetFloat3("ambient", ambientColor); }
 		
 	for (size_t i = 0; i < entities.size(); i++)
 	{
@@ -468,7 +474,7 @@ void Game::BuildUI()
 					//ps->SetData("lights",
 					//	&lights[0],
 					//	sizeof(Light) * MAX_NUM_LIGHTS);
-					ps2->SetData("lights",
+					customPS->SetData("lights",
 						&lights[0],
 						sizeof(Light) * MAX_NUM_LIGHTS);
 				}

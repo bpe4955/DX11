@@ -264,6 +264,9 @@
   <ItemGroup>
     <None Include="Lighting&amp;Texturing.hlsli" />
     <None Include="packages.config" />
+    <None Include="PBR.hlsli">
+      <FileType>Document</FileType>
+    </None>
     <None Include="ShaderIncludes.hlsli" />
     <None Include="vcpkg.json" />
   </ItemGroup>

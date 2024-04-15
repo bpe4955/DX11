@@ -46,12 +46,6 @@ SamplerState Sampler : register(s0);
 // Variables
 static const float F0_NON_METAL = 0.04f;
 
-// Move this to a "Helper.hlsli"
-float random(float2 s)
-{
-    return frac(sin(dot(s, float2(12.9898, 78.233))) * 43758.5453123);
-}
-
 // Fresnel term - Schlick approx.
 // 
 // n - Normal vector
@@ -152,7 +146,7 @@ float3 SpotLight(float3 normal, Light light, float3 viewVector, float specularPo
     // Texturing
     uv += uvOffset;
     uv *= uvScale;
-    float3 surfaceColor = SurfaceTexture.Sample(Sampler, uv).rgb * colorTint.rbg;
+    float3 surfaceColor = pow(SurfaceTexture.Sample(Sampler, uv).rgb, 2.2f) * colorTint.rbg;
     float specScale = 1.0f;
     if (hasSpecMap)
     {
@@ -178,7 +172,7 @@ float3 SpotLight(float3 normal, Light light, float3 viewVector, float specularPo
         float3 reflectionVector = reflect(-viewVector, normal); // Need camera to pixel vector, so negate
         float3 reflectionColor = EnvironmentMap.Sample(Sampler, reflectionVector).rgb;
 	    // Interpolate between the surface color and reflection color using a Fresnel term
-        float3 finalColor = lerp(finalColor, reflectionColor, SimpleFresnel(normal, viewVector, F0_NON_METAL));
+        finalColor = lerp(finalColor, reflectionColor, SimpleFresnel(normal, viewVector, F0_NON_METAL));
     }
     return finalColor;
 }

@@ -172,5 +172,8 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="vcpkg.json" />
+    <None Include="PBR.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

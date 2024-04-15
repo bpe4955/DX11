@@ -58,7 +58,7 @@ private:
 	// Simple Shaders
 	std::shared_ptr<SimpleVertexShader> vs;
 	//std::shared_ptr<SimplePixelShader> ps;
-	std::shared_ptr<SimplePixelShader> ps2;
+	std::shared_ptr<SimplePixelShader> customPS;
 
 
 	DirectX::XMFLOAT3 MouseRayCast();
