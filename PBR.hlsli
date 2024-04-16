@@ -18,6 +18,9 @@ struct Light
     float3 Padding;
 };
 
+// Bools are different sizes in HLSL and C++, so it could be good to use ints instead
+// They are okay in this situation where the size of data doesn't matter
+// But in a struct it could cause problems 
 cbuffer lightTexData : register(b0)
 {
     float4 colorTint;
