@@ -65,8 +65,21 @@ void Material::PrepareMaterial(Transform* transform, std::shared_ptr<Camera> cam
 	// Strings must match names in PixelShader.hlsl
 	pixelShader->SetFloat3("cameraPosition", camera->GetPosition());
 	pixelShader->SetFloat4("colorTint", colorTint);
-	bool hasSpecMap = textureSRVs.count("SpecularMap") != 0;
-	pixelShader->SetData("hasSpecMap", &hasSpecMap, sizeof(bool));
+	if (pixelShader->HasVariable("hasSpecMap"))
+	{
+		bool hasSpecMap = textureSRVs.count("SpecularMap") != 0;
+		pixelShader->SetData("hasSpecMap", &hasSpecMap, sizeof(bool));
+	}
+	if (pixelShader->HasVariable("hasRoughMap"))
+	{
+		bool hasRoughMap = textureSRVs.count("RoughnessMap") != 0;
+		pixelShader->SetData("hasRoughMap", &hasRoughMap, sizeof(bool));
+	}
+	if (pixelShader->HasVariable("hasMetalMap"))
+	{
+		bool hasMetalMap = textureSRVs.count("MetalnessMap") != 0;
+		pixelShader->SetData("hasMetalMap", &hasMetalMap, sizeof(bool));
+	}
 	bool hasMask = textureSRVs.count("TextureMask") != 0;
 	pixelShader->SetData("hasMask", &hasMask, sizeof(bool));
 	bool hasNormalMap = textureSRVs.count("NormalMap") != 0;
