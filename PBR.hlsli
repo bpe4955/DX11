@@ -63,16 +63,16 @@ float Attenuate(float dist, float range, float3 worldPos)
     return att * att;
 }
 
-float ConeAttenuate(float3 dir, Light light, float3 worldPosition)
+float ConeAttenuate(float3 toLight, Light light)
 {
-    float angleFromCenter = max(dot(normalize(worldPosition - light.Position), light.Direction), 0.0f);
-    return pow(angleFromCenter, light.SpotFalloff);
+    // Calculate the spot falloff
+    return pow(saturate(dot(-toLight, normalize(light.Direction))), light.SpotFalloff);
 }
 
-float Lambert(float3 normal, float3 lightDir)
+float Lambert(float3 normal, float3 dirToLight)
 {
     // angle between normal and direction to the light (negate Light Direction)
-    return saturate(dot(normal, -lightDir));
+    return saturate(dot(normal, dirToLight));
 }
 
 // Calculates diffuse amount based on energy conservation
@@ -180,30 +180,15 @@ float3 MicrofacetBRDF(float3 n, float3 l, float3 v, float roughness, float3 f0, 
     return specularResult * max(dot(n, l), 0);
 }
 
-/// TO BE DELETED
-float Phong(float3 normal, float3 lightDir, float3 viewVector, float specularPower)
-{
-    float ret = 0.0f;
-    if (specularPower != 0)
-    {
-    // Reflection of the Light coming off the surface
-        float3 refl = reflect(lightDir, normal);
-    // Get the angle between the view and reflection, saturate, raise to power
-        ret = pow(saturate(dot(viewVector, refl)), specularPower);
-    }
-    return ret;
-}
-
-
 float3 DirectionalLight(float3 normal, Light light, float3 surfaceColor, float3 viewVector, float roughness, float3 specColor, float metalness)
 {
     // Calculate Light
-    float3 normLightDir = normalize(-light.Direction);
-    float diffuse = Lambert(normal, normLightDir);
+    float3 toLight = normalize(-light.Direction);
+    float diffuse = Lambert(normal, toLight);
     float3 fresnelResult;
-    float3 specular = MicrofacetBRDF(normal, normLightDir, viewVector, roughness, specColor, fresnelResult); 
+    float3 specular = MicrofacetBRDF(normal, toLight, viewVector, roughness, specColor, fresnelResult); 
     // Calculate diffuse with energy conservation, including diffuse for metals
-    float3 balancedDiff = DiffuseEnergyConserve(diffuse, fresnelResult, metalness);
+    float3 balancedDiff = DiffuseEnergyConserve(diffuse, specular, metalness);
     // Combine the final diffuse and specular values for this light
     return (balancedDiff * surfaceColor + specular) * light.Intensity * light.Color;
 }
@@ -211,12 +196,12 @@ float3 DirectionalLight(float3 normal, Light light, float3 surfaceColor, float3 
 float3 PointLight(float3 worldPosition, float3 normal, Light light, float3 surfaceColor, float3 viewVector, float roughness, float3 specColor, float metalness)
 {
     // Calculate Light
-    float3 normLightDir = normalize(worldPosition - light.Position);
-    float diffuse = Lambert(normal, normLightDir);
+    float3 toLight = normalize(light.Position - worldPosition); 
+    float diffuse = Lambert(normal, toLight);
     float3 fresnelResult;
-    float3 specular = MicrofacetBRDF(normal, normLightDir, viewVector, roughness, specColor, fresnelResult);
+    float3 specular = MicrofacetBRDF(normal, toLight, viewVector, roughness, specColor, fresnelResult);
     // Calculate diffuse with energy conservation, including diffuse for metals
-    float3 balancedDiff = DiffuseEnergyConserve(diffuse, fresnelResult, metalness);
+    float3 balancedDiff = DiffuseEnergyConserve(diffuse, specular, metalness);
     // Combine the final diffuse and specular values for this light
     return (balancedDiff * surfaceColor + specular) * light.Color * (light.Intensity * Attenuate(light, worldPosition));
 }
@@ -224,101 +209,61 @@ float3 PointLight(float3 worldPosition, float3 normal, Light light, float3 surfa
 float3 SpotLight(float3 worldPosition, float3 normal, Light light, float3 surfaceColor, float3 viewVector, float roughness, float3 specColor, float metalness)
 {
     // Calculate Light
-    float3 normLightDir = normalize(-light.Direction);
-    float diffuse = Lambert(normal, normLightDir);
+    float3 toLight = normalize(light.Position - worldPosition);
+    float diffuse = Lambert(normal, toLight);
     float3 fresnelResult;
-    float3 specular = MicrofacetBRDF(normal, normLightDir, viewVector, roughness, specColor, fresnelResult);
+    float3 specular = MicrofacetBRDF(normal, toLight, viewVector, roughness, specColor, fresnelResult);
     // Calculate diffuse with energy conservation, including diffuse for metals
-    float3 balancedDiff = DiffuseEnergyConserve(diffuse, fresnelResult, metalness);
+    float3 balancedDiff = DiffuseEnergyConserve(diffuse, specular, metalness);
     // Combine the final diffuse and specular values for this light
-    return (balancedDiff * surfaceColor + specular) * light.Color * (light.Intensity * Attenuate(light, worldPosition) * ConeAttenuate(normLightDir, light, worldPosition));
+    return (balancedDiff * surfaceColor + specular) * light.Color * (light.Intensity * Attenuate(light, worldPosition) * ConeAttenuate(toLight, light));
 }
 
 // Assuming normal and tangent are already normalized
 float3 normalMapCalc(float2 uv, float3 normal, float3 tangent)
 {
-    float3 unpackedNormal = normalize(NormalMap.Sample(Sampler, uv).rgb * 2 - 1);
+    float3 unpackedNormal = NormalMap.Sample(Sampler, uv).rgb * 2.0f - 1.0f;
     float3 N = normal;
-    float3 T = tangent;
-    T = normalize(T - N * dot(T, N));
+    float3 T = normalize(tangent - N * dot(tangent, N));
     float3 B = cross(T, N);
     float3x3 TBN = float3x3(T, B, N);
-    return mul(unpackedNormal, TBN);
+    return normalize(mul(unpackedNormal, TBN));
 }
 
 // When getting spotlight calculations outside of totalLight
-/*
-float3 SpotLight(float3 normal, Light light, float3 viewVector, float specularPower, float3 worldPosition, float2 uv, float3 tangent)
+float3 SpotLight(float3 normal, Light light, float3 viewVector, float3 worldPosition, float2 uv, float3 tangent)
 {
     // Texturing
-    uv += uvOffset;
-    uv *= uvScale;
-    float3 surfaceColor = pow(Albedo.Sample(Sampler, uv).rgb, 2.2f) * colorTint.rbg;
-    if (hasNormalMap)
-    {
-        normal = normalMapCalc(uv, normal, tangent);
-    }
-    float roughness = 1.0f;
-    if (hasRoughMap)
-    {
-        roughness = RoughnessMap.Sample(Sampler, uv).r;
-    }
-    float specScale = 1.0f;
-    if (hasSpecMap)
-    {
-        specScale = SpecularMap.Sample(Sampler, uv).r;
-    }
-    if (hasMask)
-    {
-        surfaceColor *= TextureMask.Sample(Sampler, uv).rgb;
-    }
+    uv = uv * uvScale + uvOffset;
+    float3 surfaceColor = pow(Albedo.Sample(Sampler, uv).rgb, 2.2f);
+    surfaceColor = hasMask ? (surfaceColor * TextureMask.Sample(Sampler, uv).rgb) : surfaceColor;
+    normal = hasNormalMap ? normalMapCalc(uv, normal, tangent) : normal;
+    float roughness = hasRoughMap ? RoughnessMap.Sample(Sampler, uv).r : 0.2f;
+    float metalness = hasMetalMap ? MetalnessMap.Sample(Sampler, uv).r : 0.0f;
+    // Specular color determination
+    float3 specularColor = lerp(F0_NON_METAL, surfaceColor.rgb, metalness);
     // Lighting
-    float3 normLightDir = normalize(light.Direction);
-    float diffuse = Lambert(normal, normLightDir);
-    float specular = Phong(normal, normLightDir, viewVector, specularPower) * specScale * any(diffuse);
-    
-    float3 finalColor = light.Intensity * (diffuse * surfaceColor + specular) * Attenuate(light, worldPosition) * ConeAttenuate(normLightDir, light, worldPosition) * light.Color;
-    // EnvironmentMap Reflections
-    if (hasEnvironmentMap)
-    {
-        float3 reflectionVector = reflect(-viewVector, normal); // Need camera to pixel vector, so negate
-        float3 reflectionColor = EnvironmentMap.Sample(Sampler, reflectionVector).rgb;
-	    // Interpolate between the surface color and reflection color using a Fresnel term
-        finalColor = lerp(finalColor, reflectionColor, SimpleFresnel(normal, viewVector, F0_NON_METAL));
-    }
-    return finalColor;
+    float3 toLight = normalize(light.Position - worldPosition);
+    float diffuse = Lambert(normal, toLight);
+    float3 fresnelResult;
+    float3 specular = MicrofacetBRDF(normal, toLight, viewVector, roughness, specularColor, fresnelResult);
+    // Calculate diffuse with energy conservation, including diffuse for metals
+    float3 balancedDiff = DiffuseEnergyConserve(diffuse, specular, metalness);
+    // Combine the final diffuse and specular values for this light
+    return (balancedDiff * surfaceColor + specular) * light.Color * (light.Intensity * Attenuate(light, worldPosition) * ConeAttenuate(toLight, light));
 }
-*/
+
 
 // assuming input values are normalized
 float3 totalLight(float3 normal, float3 worldPosition, float2 uv, float3 tangent)
 {
     // Texturing
-    uv += uvOffset;
-    uv *= uvScale;
-    float3 surfaceColor = pow(Albedo.Sample(Sampler, uv).rgb, 2.2f) * colorTint.rbg;
-    if (hasNormalMap)
-    {
-        normal = normalMapCalc(uv, normal, tangent);
-    }
-    float roughness = 0.5f;
-    if (hasRoughMap)
-    {
-        roughness = RoughnessMap.Sample(Sampler, uv).r;
-    }
-    float metalness = 0.0f;
-    if (hasMetalMap)
-    {
-        metalness = MetalnessMap.Sample(Sampler, uv).r;
-    }
-    if (hasNormalMap)
-    {
-        normal = normalMapCalc(uv, normal, tangent);
-    }
-    if (hasMask)
-    {
-        surfaceColor *= TextureMask.Sample(Sampler, uv).rgb;
-    }
+    uv = uv * uvScale + uvOffset;
+    float3 surfaceColor = pow(Albedo.Sample(Sampler, uv).rgb, 2.2f);
+    surfaceColor = hasMask ? (surfaceColor * TextureMask.Sample(Sampler, uv).rgb) : surfaceColor;
+    normal = hasNormalMap ? normalMapCalc(uv, normal, tangent) : normal;
+    float roughness = hasRoughMap ? RoughnessMap.Sample(Sampler, uv).r : 0.2f;
+    float metalness = hasMetalMap ? MetalnessMap.Sample(Sampler, uv).r : 0.0f;
     // Specular color determination -----------------
     // Assume albedo texture is actually holding specular color where metalness == 1
     // Note the use of lerp here - metal is generally 0 or 1, but might be in between
@@ -326,7 +271,7 @@ float3 totalLight(float3 normal, float3 worldPosition, float2 uv, float3 tangent
     float3 specularColor = lerp(F0_NON_METAL, surfaceColor.rgb, metalness);
     // Lighting
     float3 viewVector = normalize(cameraPosition - worldPosition);
-    float3 totalLight = surfaceColor;
+    float3 totalLight = float3(0, 0, 0);
     
     // Light Calculations
     for (int i = 0; i < numLights; i++)

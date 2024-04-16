@@ -6,7 +6,7 @@
 /// </summary>
 cbuffer DataFromCPU : register(b1)
 {
-   Light spotLight;
+    Light spotLight;
 	float totalTime;
 }
 
@@ -17,8 +17,9 @@ float4 main(VertexToPixel input) : SV_TARGET
     float3 tangent = normalize(input.tangent);
     float3 viewVector = normalize(cameraPosition - input.worldPosition);
 	
-    float temp = spotLight.Color;
-	//float3 totalColor = colorTint.rgb * float3(totalLight(normal, input.worldPosition, input.uv, tangent) + SpotLight(normal, spotLight, viewVector, specularPower, input.worldPosition, input.uv, tangent));
-    float3 totalColor = colorTint.rgb * float3(totalLight(normal, input.worldPosition, input.uv, tangent)) + (temp * 0);
-    return float4(pow(totalColor.rgb, 1.0f / 2.2f), 1);
+    // (float3 normal, Light light, float3 viewVector, float specularPower, float3 worldPosition, float2 uv, float3 tangent)
+    float3 totalColor = colorTint.rgb * float3(totalLight(normal, input.worldPosition, input.uv, tangent) 
+    + SpotLight(normal, spotLight, viewVector, input.worldPosition, input.uv, tangent));
+    //float3 totalColor = colorTint.rgb * float3(totalLight(normal, input.worldPosition, input.uv, tangent)) + (temp * 0);
+    return float4(pow(totalColor, 1.0f / 2.2f), 1);
 }
