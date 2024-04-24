@@ -14,6 +14,7 @@
 #include "Light.h"
 #include "WICTextureLoader.h"
 #include "Sky.h"
+#include "ShadowLight.h"
 
 
 class Game 
@@ -48,6 +49,7 @@ private:
 	// Lights
 	Light spotLight;
 	std::vector<Light> lights;
+	std::vector<ShadowLight> shadowLights;
 
 	// Store data for entities
 	std::vector<std::shared_ptr<Mesh>> meshes;

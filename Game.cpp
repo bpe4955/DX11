@@ -77,6 +77,15 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::Init()
 {
+	// Create Cameras
+	cameraIndex = 0;
+	cameras.push_back(std::make_shared<Camera>(
+		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -10.0f)));
+	cameras.push_back(std::make_shared<Camera>(
+		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -10.0f)));
+	cameras[1]->UpdateProjMatrix(false, (float)windowWidth, (float)windowHeight);
+	cameras[1]->SetMouseSens(0.005f);
+
 	LoadShaders();
 	CreateMaterials();
 	CreateGeometry();
@@ -98,14 +107,6 @@ void Game::Init()
 		ImGui::StyleColorsDark();
 	}
 
-	// Create Cameras
-	cameraIndex = 0;
-	cameras.push_back(std::make_shared<Camera>(
-		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -10.0f)));
-	cameras.push_back(std::make_shared<Camera>(
-		(float)this->windowWidth, (float)this->windowHeight, XMFLOAT3(0.0f, 0.0f, -10.0f)));
-	cameras[1]->UpdateProjMatrix(false, (float)windowWidth, (float)windowHeight);
-	cameras[1]->SetMouseSens(0.005f);
 	// Rasterizer state
 	D3D11_RASTERIZER_DESC rd = {};
 	rd.CullMode = D3D11_CULL_NONE;
@@ -137,14 +138,14 @@ void Game::CreateMaterials()
 	// Create Sampler State
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP; 
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;		
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 	samplerDesc.MaxAnisotropy = 16;		// Can make this a "Graphics Setting"
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	device->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf());
-	
+
 	// Load Textures
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneAlb;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobblestoneMtl;
@@ -159,27 +160,27 @@ void Game::CreateMaterials()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorMtl;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorNrm;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorRgh;
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/floor_albedo.png").c_str(), nullptr,    floorAlb.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/floor_metal.png").c_str(), nullptr,     floorMtl.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/floor_normals.png").c_str(), nullptr,   floorNrm.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/floor_albedo.png").c_str(), nullptr, floorAlb.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/floor_metal.png").c_str(), nullptr, floorMtl.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/floor_normals.png").c_str(), nullptr, floorNrm.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/floor_roughness.png").c_str(), nullptr, floorRgh.GetAddressOf());
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintAlb;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintMtl;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintNrm;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintRgh;
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/paint_albedo.png").c_str(), nullptr,    paintAlb.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/paint_metal.png").c_str(), nullptr,     paintMtl.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/paint_normals.png").c_str(), nullptr,   paintNrm.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/paint_albedo.png").c_str(), nullptr, paintAlb.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/paint_metal.png").c_str(), nullptr, paintMtl.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/paint_normals.png").c_str(), nullptr, paintNrm.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/paint_roughness.png").c_str(), nullptr, paintRgh.GetAddressOf());
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedAlb;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedMtl;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedNrm;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedRgh;
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/scratched_albedo.png").c_str(), nullptr,    scratchedAlb.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/scratched_metal.png").c_str(), nullptr,     scratchedMtl.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/scratched_normals.png").c_str(), nullptr,   scratchedNrm.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/scratched_albedo.png").c_str(), nullptr, scratchedAlb.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/scratched_metal.png").c_str(), nullptr, scratchedMtl.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/scratched_normals.png").c_str(), nullptr, scratchedNrm.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/scratched_roughness.png").c_str(), nullptr, scratchedRgh.GetAddressOf());
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeAlb;
@@ -195,18 +196,18 @@ void Game::CreateMaterials()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughMtl;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughNrm;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughRgh;
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/rough_albedo.png").c_str(), nullptr,    roughAlb.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/rough_metal.png").c_str(), nullptr,     roughMtl.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/rough_normals.png").c_str(), nullptr,   roughNrm.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/rough_albedo.png").c_str(), nullptr, roughAlb.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/rough_metal.png").c_str(), nullptr, roughMtl.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/rough_normals.png").c_str(), nullptr, roughNrm.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/rough_roughness.png").c_str(), nullptr, roughRgh.GetAddressOf());
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodAlb;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodMtl;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodNrm;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodRgh;
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/wood_albedo.png").c_str(), nullptr,    woodAlb.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/wood_metal.png").c_str(), nullptr,     woodMtl.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/wood_normals.png").c_str(), nullptr,   woodNrm.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/wood_albedo.png").c_str(), nullptr, woodAlb.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/wood_metal.png").c_str(), nullptr, woodMtl.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/wood_normals.png").c_str(), nullptr, woodNrm.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/wood_roughness.png").c_str(), nullptr, woodRgh.GetAddressOf());
 
 	// Create Materials
@@ -219,24 +220,24 @@ void Game::CreateMaterials()
 
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
 	materials.back().get()->AddSampler("Sampler", samplerState);
-	materials.back().get()->AddTextureSRV("Albedo",       floorAlb);
+	materials.back().get()->AddTextureSRV("Albedo", floorAlb);
 	materials.back().get()->AddTextureSRV("RoughnessMap", floorRgh);
 	materials.back().get()->AddTextureSRV("MetalnessMap", floorMtl);
-	materials.back().get()->AddTextureSRV("NormalMap",    floorNrm);
+	materials.back().get()->AddTextureSRV("NormalMap", floorNrm);
 
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
 	materials.back().get()->AddSampler("Sampler", samplerState);
-	materials.back().get()->AddTextureSRV("Albedo",       paintAlb);
+	materials.back().get()->AddTextureSRV("Albedo", paintAlb);
 	materials.back().get()->AddTextureSRV("RoughnessMap", paintRgh);
 	materials.back().get()->AddTextureSRV("MetalnessMap", paintMtl);
-	materials.back().get()->AddTextureSRV("NormalMap",    paintNrm);
+	materials.back().get()->AddTextureSRV("NormalMap", paintNrm);
 
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
 	materials.back().get()->AddSampler("Sampler", samplerState);
-	materials.back().get()->AddTextureSRV("Albedo",       scratchedAlb);
+	materials.back().get()->AddTextureSRV("Albedo", scratchedAlb);
 	materials.back().get()->AddTextureSRV("RoughnessMap", scratchedRgh);
 	materials.back().get()->AddTextureSRV("MetalnessMap", scratchedMtl);
-	materials.back().get()->AddTextureSRV("NormalMap",    scratchedNrm);
+	materials.back().get()->AddTextureSRV("NormalMap", scratchedNrm);
 
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
 	materials.back().get()->AddSampler("Sampler", samplerState);
@@ -247,21 +248,21 @@ void Game::CreateMaterials()
 
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
 	materials.back().get()->AddSampler("Sampler", samplerState);
-	materials.back().get()->AddTextureSRV("Albedo",       roughAlb);
+	materials.back().get()->AddTextureSRV("Albedo", roughAlb);
 	materials.back().get()->AddTextureSRV("RoughnessMap", roughRgh);
 	materials.back().get()->AddTextureSRV("MetalnessMap", roughMtl);
-	materials.back().get()->AddTextureSRV("NormalMap",    roughNrm);
+	materials.back().get()->AddTextureSRV("NormalMap", roughNrm);
 
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
 	materials.back().get()->AddSampler("Sampler", samplerState);
-	materials.back().get()->AddTextureSRV("Albedo",       woodAlb);
+	materials.back().get()->AddTextureSRV("Albedo", woodAlb);
 	materials.back().get()->AddTextureSRV("RoughnessMap", woodRgh);
 	materials.back().get()->AddTextureSRV("MetalnessMap", woodMtl);
-	materials.back().get()->AddTextureSRV("NormalMap",    woodNrm);
+	materials.back().get()->AddTextureSRV("NormalMap", woodNrm);
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, customPS));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps));
-	
+
 
 	// Create SkyBox
 	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), context, device));
@@ -287,33 +288,50 @@ void Game::CreateLights()
 	spotLight.Intensity = 0.2f;
 	spotLight.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	spotLight.SpotFalloff = 1.0f;
+	//lights.push_back(Light{});
+	//lights[lights.size() - 1].Type = LIGHT_TYPE_DIR;
+	//lights[lights.size() - 1].Direction = XMFLOAT3(1.0f, -1.0f, 0.0f); // Affects top and right of objects
+	//lights[lights.size() - 1].Color = XMFLOAT3(0.2f, 0.2f, 1.0f); // Blue
+	//lights[lights.size() - 1].Intensity = 0.1f;
 	lights.push_back(Light{});
-	lights[lights.size()-1].Type = LIGHT_TYPE_DIR;
-	lights[lights.size()-1].Direction = XMFLOAT3(1.0f, -1.0f, 0.0f); // Affects top and right of objects
-	lights[lights.size()-1].Color = XMFLOAT3(0.2f, 0.2f, 1.0f); // Blue
-	lights[lights.size()-1].Intensity = 0.1f;
+	lights[lights.size() - 1].Type = LIGHT_TYPE_DIR;
+	lights[lights.size() - 1].Direction = XMFLOAT3(0.0f, 1.0f, 0.0f); // Affects bottom of objects
+	lights[lights.size() - 1].Color = XMFLOAT3(0.2f, 1.0f, 0.2f); // Green
+	lights[lights.size() - 1].Intensity = 0.2f;
 	lights.push_back(Light{});
-	lights[lights.size()-1].Type = LIGHT_TYPE_DIR;
-	lights[lights.size()-1].Direction = XMFLOAT3(0.0f, 1.0f, 0.0f); // Affects bottom of objects
-	lights[lights.size()-1].Color = XMFLOAT3(0.2f, 1.0f, 0.2f); // Green
-	lights[lights.size()-1].Intensity = 0.2f;
+	lights[lights.size() - 1].Type = LIGHT_TYPE_DIR;
+	lights[lights.size() - 1].Direction = XMFLOAT3(-1.0f, -1.0f, 0.0f); // Affects top and left of objects
+	lights[lights.size() - 1].Color = XMFLOAT3(1.0f, 0.2f, 0.2f); // Red
+	lights[lights.size() - 1].Intensity = 0.3f;
 	lights.push_back(Light{});
-	lights[lights.size()-1].Type = LIGHT_TYPE_DIR;
-	lights[lights.size()-1].Direction = XMFLOAT3(-1.0f, -1.0f, 0.0f); // Affects top and left of objects
-	lights[lights.size()-1].Color = XMFLOAT3(1.0f, 0.2f, 0.2f); // Red
-	lights[lights.size()-1].Intensity = 0.3f;
+	lights[lights.size() - 1].Type = LIGHT_TYPE_POINT;
+	lights[lights.size() - 1].Range = 5.0f;
+	lights[lights.size() - 1].Position = XMFLOAT3(4.0f, 2.5f, -2.0f); // Located behind the cube / creature
+	lights[lights.size() - 1].Color = XMFLOAT3(1.0f, 1.0f, 0.2f); // Yellow
+	lights[lights.size() - 1].Intensity = 0.5f;
 	lights.push_back(Light{});
-	lights[lights.size()-1].Type = LIGHT_TYPE_POINT;
-	lights[lights.size()-1].Range = 5.0f;
-	lights[lights.size()-1].Position = XMFLOAT3(4.0f, 2.5f, -2.0f); // Located behind the cube / creature
-	lights[lights.size()-1].Color = XMFLOAT3(1.0f, 1.0f, 0.2f); // Yellow
-	lights[lights.size()-1].Intensity = 0.5f;
-	lights.push_back(Light{});
-	lights[lights.size()-1].Type = LIGHT_TYPE_POINT;
-	lights[lights.size()-1].Range = 3.0f;
-	lights[lights.size()-1].Position = XMFLOAT3(9.0f, -0.5f, 1.65f); // Located in front of yoshi
-	lights[lights.size()-1].Color = XMFLOAT3(1.0f, 0.2f, 1.0f); // Magenta
-	lights[lights.size()-1].Intensity = 0.7f;
+	lights[lights.size() - 1].Type = LIGHT_TYPE_POINT;
+	lights[lights.size() - 1].Range = 3.0f;
+	lights[lights.size() - 1].Position = XMFLOAT3(9.0f, -0.5f, 1.65f); // Located in front of yoshi
+	lights[lights.size() - 1].Color = XMFLOAT3(1.0f, 0.2f, 1.0f); // Magenta
+	lights[lights.size() - 1].Intensity = 0.7f;
+
+	// Shadow Lights
+	//ShadowLight::SetContext(context);
+	//ShadowLight::SetDevice(device);
+	ShadowLight::SetWindowSize(&windowWidth, &windowHeight);
+	//ShadowLight::SetBackBufferRTV(backBufferRTV);
+	//ShadowLight::SetDepthBufferDSV(depthBufferDSV);
+	shadowLights.push_back(ShadowLight(
+		cameras[cameraIndex]->GetTransform().GetForward(), 5.0f, cameras[cameraIndex]->GetPosition(), 1.0f,
+		XMFLOAT3(1.0f, 1.0f, 1.0f), 1.0f, DirectX::XM_PIDIV2, device, context));
+	Light shLight = {};
+	shLight.Type = LIGHT_TYPE_DIR;
+	shLight.Direction = XMFLOAT3(1.0f, -1.0f, 0.0f); // Affects top and right of objects
+	shLight.Color = XMFLOAT3(0.2f, 0.2f, 1.0f); // Blue
+	shLight.Intensity = 0.1f;
+	shadowLights.push_back(ShadowLight(shLight, device, context));
+
 
 	//ps->SetData("lights",
 	//	&lights[0],
@@ -349,8 +367,8 @@ void Game::CreateGeometry()
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/helix.obj").c_str(), context, device));
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/torus.obj").c_str(), context, device));
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/quad.obj").c_str(), context, device));
-	
-	
+
+
 
 	// Create Entities
 	for (size_t i = 0; i < materials.size(); i++)
@@ -362,6 +380,9 @@ void Game::CreateGeometry()
 		entities.push_back(Entity(meshes[1], materials[i]));
 		entities[i].GetTransform()->SetPosition(XMFLOAT3(2.0f * (i), 0.0f, 0.0f));
 	}
+	entities.push_back(Entity(meshes[0], materials[6]));
+	entities.back().GetTransform()->SetScale(15.0f, 1.0f, 15.0f);
+	entities.back().GetTransform()->SetPosition(7.0f, -3.0f, 0.0f);
 	//entities[0].SetMaterial(materials[0]);
 	//entities.back().SetMaterial(materials.back());
 }
@@ -395,7 +416,7 @@ void Game::Update(float deltaTime, float totalTime)
 	cameras[cameraIndex]->Update(deltaTime);
 
 	//Move Entities
-	for (size_t i = 0; i < entities.size(); i ++)
+	for (size_t i = 0; i < entities.size(); i++)
 	{
 		//entities[i].GetTransform()->SetPosition((float)sin(totalTime) - i * 2.5f, 0, 0);
 	}
@@ -409,6 +430,9 @@ void Game::Update(float deltaTime, float totalTime)
 	customPS->SetData("spotLight",
 		&spotLight,
 		sizeof(Light));
+
+	shadowLights[0].SetDirection(cameras[cameraIndex]->GetTransform().GetForward());
+	shadowLights[0].SetPosition(cameras[cameraIndex]->GetPosition());
 
 	// Example input checking: Quit if the escape key is pressed
 	if (input.KeyDown(VK_ESCAPE))
@@ -432,6 +456,12 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
 
+	// DRAW Shadow Map
+	for (ShadowLight shadowLight : shadowLights)
+	{
+		shadowLight.Update(entities, backBufferRTV, depthBufferDSV);
+	}
+
 	// DRAW entities
 	XMFLOAT3 ambientColor = XMFLOAT3(uiColor.x * skyColor.x * BRIGHTNESS,
 		uiColor.y * skyColor.y * BRIGHTNESS,
@@ -441,7 +471,7 @@ void Game::Draw(float deltaTime, float totalTime)
 	if (customPS->HasVariable("totalTime")) { customPS->SetFloat("totalTime", totalTime); }
 	//if (ps->HasVariable("ambient")) { ps->SetFloat3("ambient", ambientColor); }
 	if (customPS->HasVariable("ambient")) { customPS->SetFloat3("ambient", ambientColor); }
-		
+
 	for (size_t i = 0; i < entities.size(); i++)
 	{
 		entities[i].Draw(context, cameras[cameraIndex]);
@@ -546,6 +576,46 @@ void Game::BuildUI()
 
 		if (ImGui::TreeNode("Scene Lights"))
 		{
+			if (ImGui::TreeNode("Shadow Lights"))
+			{
+				for (int i = 0; i < shadowLights.size(); i++)
+				{
+					char buf[128];
+					sprintf_s(buf, "ShadowLight %i", i);
+					if (ImGui::TreeNode(buf))
+					{
+						ImGui::Image(shadowLights[i].GetShadowSRV().Get(), ImVec2(512, 512));
+						if (shadowLights[i].GetType() == LIGHT_TYPE_DIR)
+						{
+							XMFLOAT3 dir = shadowLights[i].GetDirection();
+							float dirArray[3] = { dir.x, dir.y, dir.z };
+							if (ImGui::DragFloat3("Direction", dirArray, 0.001f, -1.0f, 1.0f, "% .3f"))
+							{
+								shadowLights[i].SetDirection(XMFLOAT3(dirArray[0], dirArray[1], dirArray[2]));
+							}
+
+						}
+						else
+						{
+							XMFLOAT3 dir = shadowLights[i].GetDirection();
+							float dirArray[3] = { dir.x, dir.y, dir.z };
+							if (ImGui::DragFloat3("Direction", dirArray, 0.001f, -1.0f, 1.0f, "% .3f"))
+							{
+								shadowLights[i].SetDirection(XMFLOAT3(dirArray[0], dirArray[1], dirArray[2]));
+							}
+							XMFLOAT3 pos = shadowLights[i].GetPosition();
+							float posArray[3] = { pos.x, pos.y, pos.z };
+							if (ImGui::DragFloat3("Position", posArray, 0.001f, -1.0f, 1.0f, "% .3f"))
+							{
+								shadowLights[i].SetPosition(XMFLOAT3(posArray[0], posArray[1], posArray[2]));
+							}
+
+						}
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
 			ImGui::ColorEdit3("Spotlight Color", &spotLight.Color.x);
 			for (int i = 0; i < lights.size(); i++)
 			{
@@ -664,13 +734,13 @@ DirectX::XMFLOAT3 Game::MouseRayCast()
 	// eye space to clip we would multiply by projection so
 	// clip space to eye space is the inverse projection
 	XMFLOAT4X4 proj = cameras[cameraIndex]->GetProjMatrix();
-	XMMATRIX invProj = XMMatrixInverse(nullptr, XMLoadFloat4x4(&proj));
+	XMMATRIX invProj = DirectX::XMMatrixInverse(nullptr, XMLoadFloat4x4(&proj));
 	XMVECTOR rayEyeVec = XMVector4Transform(XMLoadFloat4(&ray_clip), invProj);
 
 	// world space to eye space is usually multiply by view so
 	// eye space to world space is inverse view
 	XMFLOAT4X4 view = cameras[cameraIndex]->GetViewMatrix();
-	XMMATRIX viewMatInv = XMMatrixInverse(nullptr, XMLoadFloat4x4(&view));
+	XMMATRIX viewMatInv = DirectX::XMMatrixInverse(nullptr, XMLoadFloat4x4(&view));
 
 	// Convert float4 to float3 and normalize
 	XMFLOAT4 inv_ray_wor;

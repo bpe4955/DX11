@@ -16,5 +16,6 @@ struct Light
     float Intensity;
     DirectX::XMFLOAT3 Color;
     float SpotFalloff;
-    DirectX::XMFLOAT3 Padding;
+    float Fov;
+    DirectX::XMFLOAT2 Padding;
 };

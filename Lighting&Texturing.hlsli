@@ -16,7 +16,8 @@ struct Light
     float Intensity;
     float3 Color;
     float SpotFalloff;
-    float3 Padding;
+    float Fov;
+    float2 Padding;
 };
 
 cbuffer lightTexData : register(b0)
