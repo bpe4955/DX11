@@ -285,14 +285,14 @@ void Game::CreateLights()
 	spotLight.Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
 	spotLight.Range = 5.0f;
 	spotLight.Position = XMFLOAT3(1.25f, 3.0f, 0.0f);
-	spotLight.Intensity = 0.2f;
+	spotLight.Intensity = 1.0f;
 	spotLight.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	spotLight.SpotFalloff = 1.0f;
-	//lights.push_back(Light{});
-	//lights[lights.size() - 1].Type = LIGHT_TYPE_DIR;
-	//lights[lights.size() - 1].Direction = XMFLOAT3(1.0f, -1.0f, 0.0f); // Affects top and right of objects
-	//lights[lights.size() - 1].Color = XMFLOAT3(0.2f, 0.2f, 1.0f); // Blue
-	//lights[lights.size() - 1].Intensity = 0.1f;
+	lights.push_back(Light{});
+	lights[lights.size() - 1].Type = LIGHT_TYPE_DIR;
+	lights[lights.size() - 1].Direction = XMFLOAT3(1.0f, -1.0f, 0.0f); // Affects top and right of objects
+	lights[lights.size() - 1].Color = XMFLOAT3(0.2f, 0.2f, 1.0f); // Blue
+	lights[lights.size() - 1].Intensity = 1.0f;
 	lights.push_back(Light{});
 	lights[lights.size() - 1].Type = LIGHT_TYPE_DIR;
 	lights[lights.size() - 1].Direction = XMFLOAT3(0.0f, 1.0f, 0.0f); // Affects bottom of objects
@@ -302,7 +302,7 @@ void Game::CreateLights()
 	lights[lights.size() - 1].Type = LIGHT_TYPE_DIR;
 	lights[lights.size() - 1].Direction = XMFLOAT3(-1.0f, -1.0f, 0.0f); // Affects top and left of objects
 	lights[lights.size() - 1].Color = XMFLOAT3(1.0f, 0.2f, 0.2f); // Red
-	lights[lights.size() - 1].Intensity = 0.3f;
+	lights[lights.size() - 1].Intensity = 0.1f;
 	lights.push_back(Light{});
 	lights[lights.size() - 1].Type = LIGHT_TYPE_POINT;
 	lights[lights.size() - 1].Range = 5.0f;
@@ -382,7 +382,7 @@ void Game::CreateGeometry()
 	}
 	entities.push_back(Entity(meshes[0], materials[6]));
 	entities.back().GetTransform()->SetScale(15.0f, 1.0f, 15.0f);
-	entities.back().GetTransform()->SetPosition(7.0f, -3.0f, 0.0f);
+	entities.back().GetTransform()->SetPosition(0.0f, -3.0f, 0.0f);
 	//entities[0].SetMaterial(materials[0]);
 	//entities.back().SetMaterial(materials.back());
 }
@@ -416,9 +416,10 @@ void Game::Update(float deltaTime, float totalTime)
 	cameras[cameraIndex]->Update(deltaTime);
 
 	//Move Entities
-	for (size_t i = 0; i < entities.size(); i++)
+	int entSize = (int)entities.size() - 1;
+	for (int i = 0; i < entSize ; i++)
 	{
-		//entities[i].GetTransform()->SetPosition((float)sin(totalTime) - i * 2.5f, 0, 0);
+		entities[i].GetTransform()->SetPosition(-(i * 2.0f) + (40.0f / entSize), (float)sin(totalTime) + 1.0f, 0);
 	}
 
 
@@ -461,7 +462,10 @@ void Game::Draw(float deltaTime, float totalTime)
 	{
 		shadowLight.Update(entities, backBufferRTV, depthBufferDSV);
 	}
-
+	if (customPS->HasShaderResourceView("ShadowMap")) { customPS->SetShaderResourceView("ShadowMap", shadowLights[1].GetShadowSRV());  }
+	if (customPS->HasSamplerState("ShadowSampler")) { customPS->SetSamplerState("ShadowSampler", shadowLights[1].GetShadowSampler()); }
+	bool t = true;
+	if (customPS->HasVariable("hasShadowMap")) { customPS->SetData("hasShadowMap", &t, sizeof(bool)); }
 	// DRAW entities
 	XMFLOAT3 ambientColor = XMFLOAT3(uiColor.x * skyColor.x * BRIGHTNESS,
 		uiColor.y * skyColor.y * BRIGHTNESS,
@@ -474,6 +478,8 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	for (size_t i = 0; i < entities.size(); i++)
 	{
+		entities[i].GetMaterial()->GetVertShader()->SetMatrix4x4("shadowView", shadowLights[1].GetShadowViewMatrix());
+		entities[i].GetMaterial()->GetVertShader()->SetMatrix4x4("shadowProjection", shadowLights[1].GetShadowProjectionMatrix());
 		entities[i].Draw(context, cameras[cameraIndex]);
 	}
 
@@ -500,6 +506,10 @@ void Game::Draw(float deltaTime, float totalTime)
 
 		// Must re-bind buffers after presenting, as they become unbound
 		context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthBufferDSV.Get());
+
+		// Unbind SRVs
+		ID3D11ShaderResourceView* nullSRVs[128] = {};
+		context->PSSetShaderResources(0, 128, nullSRVs);
 	}
 }
 
@@ -573,7 +583,7 @@ void Game::BuildUI()
 	{
 		ImGui::DragFloat("Brightness", &BRIGHTNESS, 0.0002f, 0.001f, 0.5f, "%.3f");
 		ImGui::ColorEdit4("Background Color", &uiColor.x);
-
+		ImGui::ColorEdit3("Spotlight Color", &spotLight.Color.x);
 		if (ImGui::TreeNode("Scene Lights"))
 		{
 			if (ImGui::TreeNode("Shadow Lights"))
@@ -616,7 +626,6 @@ void Game::BuildUI()
 				}
 				ImGui::TreePop();
 			}
-			ImGui::ColorEdit3("Spotlight Color", &spotLight.Color.x);
 			for (int i = 0; i < lights.size(); i++)
 			{
 				char buf[128];

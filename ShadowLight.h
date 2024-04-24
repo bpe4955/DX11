@@ -47,7 +47,9 @@ public:
 	void SetPosition(DirectX::XMFLOAT3 _position);
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetShadowSRV();
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> GetShadowDSV();
+	DirectX::XMFLOAT4X4 GetShadowViewMatrix();
+	DirectX::XMFLOAT4X4 GetShadowProjectionMatrix();
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> GetShadowSampler();
 	int GetType();
 	DirectX::XMFLOAT3 GetDirection();
 	DirectX::XMFLOAT3 GetPosition();

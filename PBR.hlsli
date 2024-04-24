@@ -35,6 +35,7 @@ cbuffer lightTexData : register(b0)
     bool hasRoughMap;
     bool hasNormalMap;
     bool hasEnvironmentMap;
+    bool hasShadowMap;
 }
 
 // Textures
@@ -44,7 +45,9 @@ Texture2D MetalnessMap : register(t2);
 Texture2D NormalMap : register(t3);
 Texture2D TextureMask : register(t4);
 TextureCube EnvironmentMap : register(t5);
+Texture2D ShadowMap : register(t6);
 SamplerState Sampler : register(s0);
+SamplerState ShadowSampler : register(s1);
 
 // Constants
 static const float F0_NON_METAL = 0.04f;
@@ -258,7 +261,7 @@ float3 SpotLight(float3 normal, Light light, float3 viewVector, float3 worldPosi
 
 
 // assuming input values are normalized
-float3 totalLight(float3 normal, float3 worldPosition, float2 uv, float3 tangent)
+float3 totalLight(float3 normal, float3 worldPosition, float2 uv, float3 tangent, float4 shadowMapPos)
 {
     // Texturing
     uv = uv * uvScale + uvOffset;
@@ -275,14 +278,35 @@ float3 totalLight(float3 normal, float3 worldPosition, float2 uv, float3 tangent
     // Lighting
     float3 viewVector = normalize(cameraPosition - worldPosition);
     float3 totalLight = float3(0, 0, 0);
-    
+    float shadowAmount = 1.0f;
+    if (hasShadowMap)
+    {
+        // Perform the perspective divide (divide by W) ourselves
+        // Convert the normalized device coordinates to UVs for sampling
+        float2 shadowUV = shadowMapPos.xy / shadowMapPos.w * 0.5f + 0.5f;
+        shadowUV.y = 1 - shadowUV.y; // Flip the Y
+        // Grab the distances we need: light-to-pixel and closest-surface
+        float distToLight = shadowMapPos.z / shadowMapPos.w;
+        // Get a ratio of comparison results using SampleCmpLevelZero()
+        
+        // Don't know why this function doesn't work
+        // Keeps saying it doesn't take 3 parameters
+        //shadowAmount = ShadowMap.SampleCmpLevelZero(ShadowSampler, shadowUV, distToLight).r; 
+        shadowAmount = ShadowMap.Sample(Sampler, shadowUV);
+        shadowAmount = (shadowAmount < distToLight) ? 0.0f : 1.0f;
+    }
     // Light Calculations
     for (int i = 0; i < numLights; i++)
     {
         switch (lights[i].Type)
         {
             case LIGHT_TYPE_DIR:
-                totalLight += DirectionalLight(normal, lights[i], surfaceColor, viewVector, roughness, specularColor, metalness);
+                float3 dirLight = DirectionalLight(normal, lights[i], surfaceColor, viewVector, roughness, specularColor, metalness);
+                if (i == 0)
+                {
+                    dirLight *= shadowAmount;
+                }
+                totalLight += dirLight;
                 break;
             case LIGHT_TYPE_POINT:
                 totalLight += PointLight(worldPosition, normal, lights[i], surfaceColor, viewVector, roughness, specularColor, metalness);

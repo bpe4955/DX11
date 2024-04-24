@@ -56,7 +56,7 @@ void ShadowLight::Init()
 	// Create Vertex Shader
 	shadowVS = std::make_shared<SimpleVertexShader>(device, context, FixPath(L"ShadowShader.cso").c_str()); 
 	// Create matricies
-	lightProjectionSize = 15.0f;
+	lightProjectionSize = 20.0f;
 	lightProjectionDirty = true;
 	lightViewDirty = true;
 	UpdateProjectionMatrix();
@@ -96,6 +96,14 @@ void ShadowLight::SetPosition(DirectX::XMFLOAT3 _position)
 	lightViewDirty = true;
 }
 
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ShadowLight::GetShadowSRV() { return shadowSRV; }
+DirectX::XMFLOAT4X4 ShadowLight::GetShadowViewMatrix() { return shadowViewMatrix; }
+DirectX::XMFLOAT4X4 ShadowLight::GetShadowProjectionMatrix() { return shadowProjectionMatrix; }
+Microsoft::WRL::ComPtr<ID3D11SamplerState> ShadowLight::GetShadowSampler() { return shadowSampler; }
+int ShadowLight::GetType() { return light.Type; }
+DirectX::XMFLOAT3 ShadowLight::GetDirection() { return light.Direction; }
+DirectX::XMFLOAT3 ShadowLight::GetPosition() { return light.Position; }
+
 // Public Functions
 void ShadowLight::Update(std::vector<Entity> entities, Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _backBufferRTV,
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _depthBufferDSV)
@@ -106,11 +114,6 @@ void ShadowLight::Update(std::vector<Entity> entities, Microsoft::WRL::ComPtr<ID
 	Render(entities, _backBufferRTV, _depthBufferDSV);
 }
 
-Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ShadowLight::GetShadowSRV() { return shadowSRV; }
-Microsoft::WRL::ComPtr<ID3D11DepthStencilView> ShadowLight::GetShadowDSV() { return shadowDSV; }
-int ShadowLight::GetType() { return light.Type; }
-DirectX::XMFLOAT3 ShadowLight::GetDirection() { return light.Direction; }
-DirectX::XMFLOAT3 ShadowLight::GetPosition() { return light.Position; }
 
 
 // Private Helper Functions
@@ -229,7 +232,7 @@ void ShadowLight::UpdateViewMatrix()
 		// Only needs to update if direction changes
 		lightDirection = DirectX::XMLoadFloat3(&light.Direction);
 		DirectX::XMMATRIX lightView = DirectX::XMMatrixLookToLH(
-			DirectX::XMVectorScale(lightDirection, -5.0f), // Position: "Backing up" 20 units from origin
+			DirectX::XMVectorScale(lightDirection, -7.5f), // Position: "Backing up" 20 units from origin
 			lightDirection, // Direction: light's direction
 			DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f)); // Up: World up vector (Y axis)
 		XMStoreFloat4x4(&shadowViewMatrix, lightView);
@@ -254,9 +257,9 @@ void ShadowLight::Render(std::vector<Entity> entities, Microsoft::WRL::ComPtr<ID
 	// Clear the Shadow Map
 	context->ClearDepthStencilView(shadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	context->RSSetState(shadowRasterizer.Get());
-	//ID3D11RenderTargetView* nullRTV{}; // Set up the output merger stage
-	//context->OMSetRenderTargets(1, &nullRTV, shadowDSV.Get());
-	context->OMSetRenderTargets(0, 0, shadowDSV.Get());
+	ID3D11RenderTargetView* nullRTV{}; // Set up the output merger stage
+	context->OMSetRenderTargets(1, &nullRTV, shadowDSV.Get());
+	//context->OMSetRenderTargets(0, 0, shadowDSV.Get());
 	D3D11_VIEWPORT viewport = {}; // Change viewport
 	viewport.Width = (float)shadowMapResolution;
 	viewport.Height = (float)shadowMapResolution;

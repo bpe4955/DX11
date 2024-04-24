@@ -18,7 +18,7 @@ float4 main(VertexToPixel input) : SV_TARGET
     float3 viewVector = normalize(cameraPosition - input.worldPosition);
 	
     // (float3 normal, Light light, float3 viewVector, float specularPower, float3 worldPosition, float2 uv, float3 tangent)
-    float3 totalColor = colorTint.rgb * float3(totalLight(normal, input.worldPosition, input.uv, tangent) 
+    float3 totalColor = colorTint.rgb * float3(totalLight(normal, input.worldPosition, input.uv, tangent, input.shadowMapPos) 
     + SpotLight(normal, spotLight, viewVector, input.worldPosition, input.uv, tangent));
     //float3 totalColor = colorTint.rgb * float3(totalLight(normal, input.worldPosition, input.uv, tangent)) + (temp * 0);
     return float4(pow(totalColor, 1.0f / 2.2f), 1);

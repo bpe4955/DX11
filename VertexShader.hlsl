@@ -9,6 +9,9 @@ cbuffer DataFromCPU: register(b0)
     matrix worldInvTranspose;
     matrix view;
     matrix proj;
+
+    matrix shadowView;
+    matrix shadowProjection;
 }
 
 //	cbuffer FrameData: register(b1)
@@ -34,6 +37,10 @@ VertexToPixel main( VertexShaderInput input )
     output.normal = mul((float3x3)worldInvTranspose, input.normal);
     output.worldPosition = mul(world, float4(input.localPosition, 1)).xyz;
     output.tangent = input.tangent;
+    
+	// Calculate where this vertex is from the light's point of view
+    matrix shadowWVP = mul(shadowProjection, mul(shadowView, world));
+    output.shadowMapPos = mul(shadowWVP, float4(input.localPosition, 1.0f));
 	
 	return output;
 }
