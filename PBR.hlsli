@@ -47,7 +47,7 @@ Texture2D TextureMask : register(t4);
 TextureCube EnvironmentMap : register(t5);
 Texture2D ShadowMap : register(t6);
 SamplerState Sampler : register(s0);
-SamplerState ShadowSampler : register(s1);
+SamplerComparisonState ShadowSampler : register(s1);
 
 // Constants
 static const float F0_NON_METAL = 0.04f;
@@ -288,12 +288,7 @@ float3 totalLight(float3 normal, float3 worldPosition, float2 uv, float3 tangent
         // Grab the distances we need: light-to-pixel and closest-surface
         float distToLight = shadowMapPos.z / shadowMapPos.w;
         // Get a ratio of comparison results using SampleCmpLevelZero()
-        
-        // Don't know why this function doesn't work
-        // Keeps saying it doesn't take 3 parameters
-        //shadowAmount = ShadowMap.SampleCmpLevelZero(ShadowSampler, shadowUV, distToLight).r; 
-        shadowAmount = ShadowMap.Sample(Sampler, shadowUV);
-        shadowAmount = (shadowAmount < distToLight) ? 0.0f : 1.0f;
+        shadowAmount = ShadowMap.SampleCmpLevelZero(ShadowSampler, shadowUV, distToLight).r; 
     }
     // Light Calculations
     for (int i = 0; i < numLights; i++)
