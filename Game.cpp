@@ -49,6 +49,7 @@ Game::Game(HINSTANCE hInstance)
 #endif
 	cameraIndex = 0;
 	spotLight = {};
+	blurStrength = 0;
 }
 
 // --------------------------------------------------------
@@ -508,6 +509,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		ppPS->SetShader();
 		ppPS->SetShaderResourceView("Pixels", ppSRV.Get());
 		ppPS->SetSamplerState("ClampSampler", ppSampler.Get());
+		ppPS->SetInt("blurRadius", blurStrength);
+		ppPS->SetFloat("pixelWidth", 1.0f / windowWidth);
+		ppPS->SetFloat("pixelHeight", 1.0f / windowHeight);
 		ppPS->CopyAllBufferData();
 		context->Draw(3, 0); // Draw exactly 3 vertices (one triangle)
 	}
@@ -747,8 +751,13 @@ void Game::BuildUI()
 	{
 		if (ImGui::TreeNode("Before"))
 		{
-			ImGui::Image(ppSRV.Get(), ImVec2(windowWidth / 4, windowHeight / 4));
+			ImGui::Image(ppSRV.Get(), ImVec2((float)windowWidth / 4, (float)windowHeight / 4));
 
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNode("Blur"))
+		{
+			ImGui::DragInt("Blur Strength", &blurStrength, 0.05f, 0, 10);
 			ImGui::TreePop();
 		}
 		
