@@ -36,6 +36,7 @@ cbuffer lightTexData : register(b0)
     bool hasNormalMap;
     bool hasEnvironmentMap;
     bool hasShadowMap;
+    bool hasOpacityMap;
 }
 
 // Textures
@@ -46,6 +47,7 @@ Texture2D NormalMap : register(t3);
 Texture2D TextureMask : register(t4);
 TextureCube EnvironmentMap : register(t5);
 Texture2D ShadowMap : register(t6);
+Texture2D OpacityMap : register(t7);
 SamplerState Sampler : register(s0);
 SamplerComparisonState ShadowSampler : register(s1);
 
@@ -263,6 +265,9 @@ float3 SpotLight(float3 normal, Light light, float3 viewVector, float3 worldPosi
 // assuming input values are normalized
 float3 totalLight(float3 normal, float3 worldPosition, float2 uv, float3 tangent, float4 shadowMapPos)
 {
+    // Alpha-Clipping
+    float alpha = hasOpacityMap ? OpacityMap.Sample(Sampler, uv).r : 1.0f;
+    clip(alpha - 0.1f);
     // Texturing
     uv = uv * uvScale + uvOffset;
     float3 surfaceColor = pow(Albedo.Sample(Sampler, uv).rgb, 2.2f);

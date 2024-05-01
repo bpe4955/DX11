@@ -215,6 +215,16 @@ void Game::CreateMaterials()
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/wood_normals.png").c_str(), nullptr, woodNrm.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/wood_roughness.png").c_str(), nullptr, woodRgh.GetAddressOf());
 
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> webAlb;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> webOpc;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> webNrm;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> webRgh;
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_albedo.jpg").c_str(), nullptr,    webAlb.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_opacity.jpg").c_str(), nullptr,   webOpc.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_normals.png").c_str(), nullptr,   webNrm.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_roughness.jpg").c_str(), nullptr, webRgh.GetAddressOf());
+	
 	// Create Materials
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
 	materials.back().get()->AddSampler("Sampler", samplerState);
@@ -264,6 +274,13 @@ void Game::CreateMaterials()
 	materials.back().get()->AddTextureSRV("RoughnessMap", woodRgh);
 	materials.back().get()->AddTextureSRV("MetalnessMap", woodMtl);
 	materials.back().get()->AddTextureSRV("NormalMap", woodNrm);
+
+	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
+	materials.back().get()->AddSampler("Sampler", samplerState);
+	materials.back().get()->AddTextureSRV("Albedo",       webAlb);
+	materials.back().get()->AddTextureSRV("RoughnessMap", webRgh);
+	materials.back().get()->AddTextureSRV("OpacityMap",   webOpc);
+	materials.back().get()->AddTextureSRV("NormalMap",    webNrm);
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, customPS));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps));

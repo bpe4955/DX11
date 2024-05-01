@@ -80,6 +80,11 @@ void Material::PrepareMaterial(Transform* transform, std::shared_ptr<Camera> cam
 		bool hasMetalMap = textureSRVs.count("MetalnessMap") != 0;
 		pixelShader->SetData("hasMetalMap", &hasMetalMap, sizeof(bool));
 	}
+	if (pixelShader->HasVariable("hasOpacityMap"))
+	{
+		bool hasOpacityMap = textureSRVs.count("OpacityMap") != 0;
+		pixelShader->SetData("hasOpacityMap", &hasOpacityMap, sizeof(bool));
+	}
 	//if (pixelShader->HasVariable("hasShadowMap"))
 	//{
 	//	bool hasShadowMap = textureSRVs.count("ShadowMap") != 0;
