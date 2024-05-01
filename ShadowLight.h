@@ -55,8 +55,10 @@ public:
 	DirectX::XMFLOAT3 GetPosition();
 
 	// Public Functions
-	void Update(std::vector<Entity> entities, Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _backBufferRTV,
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _depthBufferDSV);
+	void Update(std::vector<Entity> entities, std::vector<Entity> transparentEntities,
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _backBufferRTV,
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _depthBufferDSV,
+		Microsoft::WRL::ComPtr<ID3D11RasterizerState> _rasterizerState);
 
 private:
 	/// <summary>
@@ -93,7 +95,9 @@ private:
 	void UpdateProjectionMatrix();
 	void UpdateViewMatrix();
 
-	void Render(std::vector<Entity> entities, Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _backBufferRTV,
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _depthBufferDSV);
+	void Render(std::vector<Entity> entities, std::vector<Entity> transparentEntities,
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _backBufferRTV,
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _depthBufferDSV,
+		Microsoft::WRL::ComPtr<ID3D11RasterizerState> _rasterizerState);
 };
 

@@ -37,6 +37,7 @@ cbuffer lightTexData : register(b0)
     bool hasEnvironmentMap;
     bool hasShadowMap;
     bool hasOpacityMap;
+    float transparency;
 }
 
 // Textures
@@ -239,8 +240,12 @@ float3 normalMapCalc(float2 uv, float3 normal, float3 tangent)
 }
 
 // When getting spotlight calculations outside of totalLight
-float3 SpotLight(float3 normal, Light light, float3 viewVector, float3 worldPosition, float2 uv, float3 tangent)
+float4 SpotLight(float3 normal, Light light, float3 viewVector, float3 worldPosition, float2 uv, float3 tangent)
 {
+    // Alpha-Clipping
+    float alpha = hasOpacityMap ? OpacityMap.Sample(Sampler, uv).r : 1.0f;
+    alpha *= transparency; // Material's transparency value
+    clip(alpha - 0.1f);
     // Texturing
     uv = uv * uvScale + uvOffset;
     float3 surfaceColor = pow(Albedo.Sample(Sampler, uv).rgb, 2.2f);
@@ -258,15 +263,17 @@ float3 SpotLight(float3 normal, Light light, float3 viewVector, float3 worldPosi
     // Calculate diffuse with energy conservation, including diffuse for metals
     float3 balancedDiff = DiffuseEnergyConserve(diffuse, specular, metalness);
     // Combine the final diffuse and specular values for this light
-    return (balancedDiff * surfaceColor + specular) * light.Color * (light.Intensity * Attenuate(light, worldPosition) * ConeAttenuate(toLight, light));
+    float3 finalColor = (balancedDiff * surfaceColor + specular) * light.Color * (light.Intensity * Attenuate(light, worldPosition) * ConeAttenuate(toLight, light));
+    return float4(finalColor, alpha);
 }
 
 
 // assuming input values are normalized
-float3 totalLight(float3 normal, float3 worldPosition, float2 uv, float3 tangent, float4 shadowMapPos)
+float4 totalLight(float3 normal, float3 worldPosition, float2 uv, float3 tangent, float4 shadowMapPos)
 {
     // Alpha-Clipping
     float alpha = hasOpacityMap ? OpacityMap.Sample(Sampler, uv).r : 1.0f;
+    alpha *= transparency; // Material's transparency value
     clip(alpha - 0.1f);
     // Texturing
     uv = uv * uvScale + uvOffset;
@@ -334,7 +341,7 @@ float3 totalLight(float3 normal, float3 worldPosition, float2 uv, float3 tangent
     //    float3 h = normalize(viewVector + normalize(-light.Direction));
     //    finalColor = lerp(totalLight, reflectionColor, F_Schlick(viewVector, viewVector, F0_NON_METAL));
     //}
-    return finalColor;
+    return float4(finalColor, alpha);
 }
 
 

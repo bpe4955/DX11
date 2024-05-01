@@ -18,6 +18,8 @@ public:
 	float GetRoughness();
 	std::shared_ptr<SimpleVertexShader> GetVertShader();
 	std::shared_ptr<SimplePixelShader> GetPixelShader();
+	bool HasTextureSRV(std::string name);
+	float GetTransparency();
 
 	// Setters
 	void SetColorTint(DirectX::XMFLOAT4 _colorTint);
@@ -29,13 +31,16 @@ public:
 	void SetUVScale(DirectX::XMFLOAT2  _uvScale);
 	void AddTextureSRV(std::string shaderVariableName, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv);
 	void AddSampler(std::string samplerVariableName, Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler);
+	void SetTransparency(float _transparency);
 
 	// Function
 	void PrepareMaterial(Transform* transform, std::shared_ptr<Camera> camera);
 
 private:
+
 	DirectX::XMFLOAT4 colorTint;
 	float roughness;
+	float transparency;
 	std::shared_ptr<SimpleVertexShader> vertShader;
 	std::shared_ptr<SimplePixelShader> pixelShader;
 

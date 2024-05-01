@@ -54,13 +54,19 @@ private:
 	// Store data for entities
 	std::vector<std::shared_ptr<Mesh>> meshes;
 	std::vector<std::shared_ptr<Material>> materials;
+	std::vector<std::shared_ptr<Material>> transparentMaterials;
 	std::vector<Entity> entities;
+	std::vector<Entity> transparentEntities;
 	std::unique_ptr<Sky> skyBox;
 
 	// Simple Shaders
 	std::shared_ptr<SimpleVertexShader> vs;
 	//std::shared_ptr<SimplePixelShader> ps;
 	std::shared_ptr<SimplePixelShader> customPS;
+
+	// Blending
+	Microsoft::WRL::ComPtr<ID3D11BlendState> blendState;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> cullBackRastState;
 
 	// Post Processing
 	// Resources that are shared among all post processes

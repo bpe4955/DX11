@@ -105,13 +105,15 @@ DirectX::XMFLOAT3 ShadowLight::GetDirection() { return light.Direction; }
 DirectX::XMFLOAT3 ShadowLight::GetPosition() { return light.Position; }
 
 // Public Functions
-void ShadowLight::Update(std::vector<Entity> entities, Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _backBufferRTV,
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _depthBufferDSV)
+void ShadowLight::Update(std::vector<Entity> entities, std::vector<Entity> transparentEntities,
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _backBufferRTV,
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _depthBufferDSV,
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> _rasterizerState)
 {
 	if (lightProjectionDirty) { UpdateProjectionMatrix(); }
 	if (lightViewDirty) { UpdateViewMatrix(); }
 
-	Render(entities, _backBufferRTV, _depthBufferDSV);
+	Render(entities, transparentEntities, _backBufferRTV, _depthBufferDSV, _rasterizerState);
 }
 
 
@@ -250,8 +252,10 @@ void ShadowLight::UpdateViewMatrix()
 	}
 }
 
-void ShadowLight::Render(std::vector<Entity> entities, Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _backBufferRTV,
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _depthBufferDSV)
+void ShadowLight::Render(std::vector<Entity> entities, std::vector<Entity> transparentEntities,
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> _backBufferRTV,
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> _depthBufferDSV,
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> _rasterizerState)
 {
 	// Setup
 	// Clear the Shadow Map
@@ -279,6 +283,15 @@ void ShadowLight::Render(std::vector<Entity> entities, Microsoft::WRL::ComPtr<ID
 		// Note: Your code may differ significantly here!
 		e.GetMesh()->Draw();
 	}
+
+	for (auto& e : transparentEntities)
+	{
+		shadowVS->SetMatrix4x4("world", e.GetTransform()->GetWorldMatrix());
+		shadowVS->CopyAllBufferData();
+		// Draw the mesh directly to avoid the entity's material
+		// Note: Your code may differ significantly here!
+		e.GetMesh()->Draw();
+	}
 	// Reset the pipline
 	viewport.Width = (float)*windowWidth;
 	viewport.Height = (float)*windowHeight;
@@ -287,5 +300,5 @@ void ShadowLight::Render(std::vector<Entity> entities, Microsoft::WRL::ComPtr<ID
 		1,
 		_backBufferRTV.GetAddressOf(),
 		_depthBufferDSV.Get());
-	context->RSSetState(0);
+	context->RSSetState(_rasterizerState.Get());
 }

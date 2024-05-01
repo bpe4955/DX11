@@ -9,6 +9,7 @@
 // Needed for a helper function to load pre-compiled shader files
 #pragma comment(lib, "d3dcompiler.lib")
 #include <d3dcompiler.h>
+#include <algorithm>
 
 // For the DirectX Math library
 using namespace DirectX;
@@ -113,8 +114,28 @@ void Game::Init()
 	rd.CullMode = D3D11_CULL_NONE;
 	rd.FillMode = D3D11_FILL_SOLID;
 	device->CreateRasterizerState(&rd, rastState.GetAddressOf());
-
 	context->RSSetState(rastState.Get());
+	Entity::SetDefaultRastState(rastState);
+
+	D3D11_RASTERIZER_DESC blendRd = {};
+	blendRd.CullMode = D3D11_CULL_BACK;
+	blendRd.FillMode = D3D11_FILL_SOLID;
+	device->CreateRasterizerState(&blendRd, cullBackRastState.GetAddressOf());
+	Entity::SetCullBackRastState(cullBackRastState);
+
+	// Blend state
+	D3D11_BLEND_DESC bd = {};
+	bd.AlphaToCoverageEnable = false;
+	bd.IndependentBlendEnable = false;
+	bd.RenderTarget[0].BlendEnable = true;
+	bd.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	bd.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	bd.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	bd.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	bd.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	bd.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	bd.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	device->CreateBlendState(&bd, blendState.GetAddressOf());
 
 	PostProcessSetup();
 }
@@ -220,11 +241,18 @@ void Game::CreateMaterials()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> webOpc;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> webNrm;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> webRgh;
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_albedo.jpg").c_str(), nullptr,    webAlb.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_opacity.jpg").c_str(), nullptr,   webOpc.GetAddressOf());
-	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_normals.png").c_str(), nullptr,   webNrm.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_albedo.jpg").c_str(), nullptr, webAlb.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_opacity.jpg").c_str(), nullptr, webOpc.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_normals.png").c_str(), nullptr, webNrm.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_roughness.jpg").c_str(), nullptr, webRgh.GetAddressOf());
-	
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> waterAlb;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> waterNrm;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> waterRgh;
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/water_albedo.jpg").c_str(), nullptr, waterAlb.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/water_normals.png").c_str(), nullptr, waterNrm.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/water_roughness.jpg").c_str(), nullptr, waterRgh.GetAddressOf());
+
 	// Create Materials
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
 	materials.back().get()->AddSampler("Sampler", samplerState);
@@ -275,12 +303,20 @@ void Game::CreateMaterials()
 	materials.back().get()->AddTextureSRV("MetalnessMap", woodMtl);
 	materials.back().get()->AddTextureSRV("NormalMap", woodNrm);
 
-	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
-	materials.back().get()->AddSampler("Sampler", samplerState);
-	materials.back().get()->AddTextureSRV("Albedo",       webAlb);
-	materials.back().get()->AddTextureSRV("RoughnessMap", webRgh);
-	materials.back().get()->AddTextureSRV("OpacityMap",   webOpc);
-	materials.back().get()->AddTextureSRV("NormalMap",    webNrm);
+
+	transparentMaterials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
+	transparentMaterials.back().get()->AddSampler("Sampler", samplerState);
+	transparentMaterials.back().get()->AddTextureSRV("Albedo", webAlb);
+	transparentMaterials.back().get()->AddTextureSRV("RoughnessMap", webRgh);
+	transparentMaterials.back().get()->AddTextureSRV("OpacityMap", webOpc);
+	transparentMaterials.back().get()->AddTextureSRV("NormalMap", webNrm);
+
+	transparentMaterials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
+	transparentMaterials.back().get()->AddSampler("Sampler", samplerState);
+	transparentMaterials.back().get()->AddTextureSRV("Albedo", waterAlb);
+	transparentMaterials.back().get()->AddTextureSRV("RoughnessMap", waterRgh);
+	transparentMaterials.back().get()->AddTextureSRV("NormalMap", waterNrm);
+	transparentMaterials.back().get()->SetTransparency(0.5f);
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, customPS));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps));
@@ -400,13 +436,21 @@ void Game::CreateGeometry()
 		//entities.push_back(Entity(meshes[i], materials[i%2 + 2]));
 		//entities[i * 2 + 1].GetTransform()->SetPosition(XMFLOAT3(3.0f * (1 + i), 0.0f, 0.0f));
 		entities.push_back(Entity(meshes[1], materials[i]));
-		entities[i].GetTransform()->SetPosition(XMFLOAT3(2.0f * (i), 0.0f, 0.0f));
+		entities.back().GetTransform()->SetPosition(XMFLOAT3(2.0f * (i), 0.0f, 0.0f));
 	}
 	entities.push_back(Entity(meshes[0], materials[6]));
 	entities.back().GetTransform()->SetScale(15.0f, 1.0f, 15.0f);
 	entities.back().GetTransform()->SetPosition(0.0f, -3.0f, 0.0f);
+
+	for (size_t i = 0; i < transparentMaterials.size(); i++)
+	{
+		transparentEntities.push_back(Entity(meshes[1], transparentMaterials[i]));
+		transparentEntities.back().GetTransform()->SetPosition(-(i * 2.0f), 1.0f, -2.5f);
+	}
 	//entities[0].SetMaterial(materials[0]);
 	//entities.back().SetMaterial(materials.back());
+
+
 }
 
 
@@ -441,9 +485,15 @@ void Game::Update(float deltaTime, float totalTime)
 
 	//Move Entities
 	int entSize = (int)entities.size() - 1;
-	for (int i = 0; i < entSize ; i++)
+	for (int i = 0; i < entSize; i++)
 	{
 		entities[i].GetTransform()->SetPosition(-(i * 2.0f) + (40.0f / entSize), (float)sin(totalTime) + 1.0f, 0);
+	}
+	entSize = (int)transparentEntities.size();
+	for (int i = 0; i < entSize; i++)
+	{
+		//XMFLOAT3 pos = transparentEntities[i].GetTransform()->GetPosition();
+		//transparentEntities[i].GetTransform()->SetPosition(pos.x, (float)sin(totalTime) + 1.0f, pos.z);
 	}
 
 
@@ -483,14 +533,15 @@ void Game::Draw(float deltaTime, float totalTime)
 		// Post-Process
 		context->ClearRenderTargetView(ppRTV.Get(), bgColor);
 		context->OMSetRenderTargets(1, ppRTV.GetAddressOf(), depthBufferDSV.Get());
+
 	}
 
 	// DRAW Shadow Map
 	for (ShadowLight shadowLight : shadowLights)
 	{
-		shadowLight.Update(entities, ppRTV, depthBufferDSV);
+		shadowLight.Update(entities, transparentEntities, ppRTV, depthBufferDSV, rastState);
 	}
-	if (customPS->HasShaderResourceView("ShadowMap")) { customPS->SetShaderResourceView("ShadowMap", shadowLights[1].GetShadowSRV());  }
+	if (customPS->HasShaderResourceView("ShadowMap")) { customPS->SetShaderResourceView("ShadowMap", shadowLights[1].GetShadowSRV()); }
 	if (customPS->HasSamplerState("ShadowSampler")) { customPS->SetSamplerState("ShadowSampler", shadowLights[1].GetShadowSampler()); }
 	bool t = true;
 	if (customPS->HasVariable("hasShadowMap")) { customPS->SetData("hasShadowMap", &t, sizeof(bool)); }
@@ -514,6 +565,37 @@ void Game::Draw(float deltaTime, float totalTime)
 	// DRAW Skybox
 	skyBox->colorTint = uiColor;
 	skyBox->Draw(context, cameras[cameraIndex], rastState);
+
+	// DRAW Transparent entities
+	{
+		// Sort the transparent objects by distance to the camera
+			// Sort using a lambda function
+		std::sort(
+			transparentEntities.begin(),
+			transparentEntities.end(),
+			[&](Entity a, Entity b) -> bool
+			{
+				// Grab vectors
+				XMFLOAT3 aPos = a.GetTransform()->GetPosition();
+				XMFLOAT3 bPos = b.GetTransform()->GetPosition();
+				XMFLOAT3 camPos = cameras[cameraIndex]->GetPosition();
+
+				// Calc distances and compare
+				float aDist = XMVectorGetX(XMVector3Length(XMLoadFloat3(&aPos) - XMLoadFloat3(&camPos)));
+				float bDist = XMVectorGetX(XMVector3Length(XMLoadFloat3(&bPos) - XMLoadFloat3(&camPos)));
+				return aDist > bDist;
+			});
+		// Set blend state
+		context->OMSetBlendState(blendState.Get(), 0, 0xFFFFFFFF);
+		for (size_t i = 0; i < transparentEntities.size(); i++)
+		{
+			transparentEntities[i].GetMaterial()->GetVertShader()->SetMatrix4x4("shadowView", shadowLights[1].GetShadowViewMatrix());
+			transparentEntities[i].GetMaterial()->GetVertShader()->SetMatrix4x4("shadowProjection", shadowLights[1].GetShadowProjectionMatrix());
+			transparentEntities[i].Draw(context, cameras[cameraIndex]);
+		}
+		// Reset blend state
+		context->OMSetBlendState(0, 0, 0xFFFFFFFF);
+	}
 
 	// Post-Render
 	{
@@ -777,7 +859,7 @@ void Game::BuildUI()
 			ImGui::DragInt("Blur Strength", &blurStrength, 0.05f, 0, 10);
 			ImGui::TreePop();
 		}
-		
+
 		ImGui::TreePop();
 	}
 

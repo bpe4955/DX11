@@ -5,6 +5,7 @@ Material::Material(DirectX::XMFLOAT4 _colorTint, float _roughness,
 	std::shared_ptr<SimpleVertexShader> _vertShader, std::shared_ptr<SimplePixelShader> _pixelShader) :
 	colorTint(_colorTint),
 	roughness(_roughness),
+	transparency(1.0f),
 	vertShader(_vertShader),
 	pixelShader(_pixelShader) 
 {
@@ -19,6 +20,8 @@ DirectX::XMFLOAT4 Material::GetColorTint() { return colorTint; }
 float Material::GetRoughness() { return roughness; }
 std::shared_ptr<SimpleVertexShader> Material::GetVertShader() { return vertShader; }
 std::shared_ptr<SimplePixelShader> Material::GetPixelShader() { return pixelShader; }
+bool Material::HasTextureSRV(std::string name) { return textureSRVs.find(name) != textureSRVs.end(); }
+float Material::GetTransparency() { return transparency; }
 
 // Setters
 void Material::SetColorTint(DirectX::XMFLOAT4 _colorTint) { colorTint = _colorTint; }
@@ -40,6 +43,7 @@ void Material::AddSampler(std::string samplerVariableName, Microsoft::WRL::ComPt
 {
 	samplers.insert({ samplerVariableName, sampler });
 }
+void Material::SetTransparency(float _transparency) { transparency = _transparency >= 0.0f && _transparency <= 1.0f ? _transparency : 1.0f; }
 
 
 // Functions
@@ -97,6 +101,7 @@ void Material::PrepareMaterial(Transform* transform, std::shared_ptr<Camera> cam
 	bool hasEnvironmentMap = textureSRVs.count("EnvironmentMap") != 0;
 	pixelShader->SetData("hasEnvironmentMap", &hasEnvironmentMap, sizeof(bool));
 	pixelShader->SetFloat("roughness", roughness);
+	pixelShader->SetFloat("transparency", transparency);
 	pixelShader->SetFloat2("uvOffset", uvOffset);
 	pixelShader->SetFloat2("uvScale", uvScale);
 
