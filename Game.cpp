@@ -607,7 +607,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// DRAW Transparent entities
 	{
-		if((int)(totalTime*100) % 10 == 0) { transparentMaterials[3]->AddUVOffset(XMFLOAT2(deltaTime*(rand()%10), deltaTime * (rand() % 10))); }
+		if((int)(totalTime*100) % 10 == 0) { transparentMaterials[3]->AddUVOffset(XMFLOAT2(deltaTime*(rand()%10+2), deltaTime * (rand() % 10 + 2))); }
 		// Sort the transparent objects by distance to the camera
 			// Sort using a lambda function
 		std::sort(
