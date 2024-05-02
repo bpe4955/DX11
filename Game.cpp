@@ -246,12 +246,28 @@ void Game::CreateMaterials()
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_normals.png").c_str(), nullptr, webNrm.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/web_roughness.jpg").c_str(), nullptr, webRgh.GetAddressOf());
 
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> plasticAlb;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> plasticOpc;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> plasticNrm;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> plasticRgh;
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/plastic_albedo.jpg").c_str(), nullptr,    plasticAlb.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/plastic_opacity.jpg").c_str(), nullptr,   plasticOpc.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/plastic_normals.png").c_str(), nullptr,   plasticNrm.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/plastic_roughness.jpg").c_str(), nullptr, plasticRgh.GetAddressOf());
+
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> waterAlb;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> waterNrm;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> waterRgh;
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/water_albedo.jpg").c_str(), nullptr, waterAlb.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/water_normals.png").c_str(), nullptr, waterNrm.GetAddressOf());
 	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/water_roughness.jpg").c_str(), nullptr, waterRgh.GetAddressOf());
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rainAlb;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rainNrm;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> rainRgh;
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/rain_albedo.jpg").c_str(), nullptr,    rainAlb.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/rain_normals.png").c_str(), nullptr,   rainNrm.GetAddressOf());
+	CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/PBR/rain_roughness.jpg").c_str(), nullptr, rainRgh.GetAddressOf());
 
 	// Create Materials
 	materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
@@ -313,10 +329,26 @@ void Game::CreateMaterials()
 
 	transparentMaterials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
 	transparentMaterials.back().get()->AddSampler("Sampler", samplerState);
+	transparentMaterials.back().get()->AddTextureSRV("Albedo",       plasticAlb);
+	transparentMaterials.back().get()->AddTextureSRV("RoughnessMap", plasticRgh);
+	transparentMaterials.back().get()->AddTextureSRV("OpacityMap",   plasticOpc);
+	transparentMaterials.back().get()->AddTextureSRV("NormalMap",    plasticNrm);
+	transparentMaterials.back().get()->SetTransparency(0.9f);
+
+	transparentMaterials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.1f, vs, customPS));
+	transparentMaterials.back().get()->AddSampler("Sampler", samplerState);
 	transparentMaterials.back().get()->AddTextureSRV("Albedo", waterAlb);
 	transparentMaterials.back().get()->AddTextureSRV("RoughnessMap", waterRgh);
 	transparentMaterials.back().get()->AddTextureSRV("NormalMap", waterNrm);
 	transparentMaterials.back().get()->SetTransparency(0.5f);
+
+	transparentMaterials.push_back(std::make_shared<Material>(XMFLOAT4(0.3f, 0.7f, 1.0f, 1.0f), 0.1f, vs, customPS));
+	transparentMaterials.back().get()->AddSampler("Sampler", samplerState);
+	transparentMaterials.back().get()->AddTextureSRV("Albedo",       rainAlb);
+	transparentMaterials.back().get()->AddTextureSRV("RoughnessMap", rainRgh);
+	transparentMaterials.back().get()->AddTextureSRV("NormalMap",    rainNrm);
+	transparentMaterials.back().get()->SetTransparency(0.5f);
+	transparentMaterials.back().get()->SetUVScale(XMFLOAT2(2.f,2.f));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, customPS));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.8f, vs, ps));
 	//materials.push_back(std::make_shared<Material>(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), 0.2f, vs, ps));
@@ -424,7 +456,7 @@ void Game::CreateGeometry()
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cylinder.obj").c_str(), context, device));
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/helix.obj").c_str(), context, device));
 	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/torus.obj").c_str(), context, device));
-	//meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/quad.obj").c_str(), context, device));
+	meshes.push_back(std::make_shared<Mesh>(FixPath(L"../../Assets/Models/quad.obj").c_str(), context, device));
 
 
 
@@ -447,6 +479,13 @@ void Game::CreateGeometry()
 		transparentEntities.push_back(Entity(meshes[1], transparentMaterials[i]));
 		transparentEntities.back().GetTransform()->SetPosition(-(i * 2.0f), 1.0f, -2.5f);
 	}
+
+	transparentEntities.push_back(Entity(meshes[2], transparentMaterials[2]));
+	transparentEntities.back().GetTransform()->SetScale(15.0f, 1.0f, 15.0f);
+	transparentEntities.back().GetTransform()->SetPosition(0, -1.99f, 0);
+	transparentEntities.push_back(Entity(meshes[2], transparentMaterials[3]));
+	transparentEntities.back().GetTransform()->SetScale(15.0f, 1.0f, 15.0f);
+	transparentEntities.back().GetTransform()->SetPosition(0, -1.98f, 0);
 	//entities[0].SetMaterial(materials[0]);
 	//entities.back().SetMaterial(materials.back());
 
@@ -568,6 +607,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	// DRAW Transparent entities
 	{
+		if((int)(totalTime*100) % 10 == 0) { transparentMaterials[3]->AddUVOffset(XMFLOAT2(deltaTime*(rand()%10), deltaTime * (rand() % 10))); }
 		// Sort the transparent objects by distance to the camera
 			// Sort using a lambda function
 		std::sort(

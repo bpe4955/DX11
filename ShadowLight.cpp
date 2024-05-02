@@ -283,15 +283,15 @@ void ShadowLight::Render(std::vector<Entity> entities, std::vector<Entity> trans
 		// Note: Your code may differ significantly here!
 		e.GetMesh()->Draw();
 	}
-
-	for (auto& e : transparentEntities)
-	{
-		shadowVS->SetMatrix4x4("world", e.GetTransform()->GetWorldMatrix());
-		shadowVS->CopyAllBufferData();
-		// Draw the mesh directly to avoid the entity's material
-		// Note: Your code may differ significantly here!
-		e.GetMesh()->Draw();
-	}
+	// Transparent Entities - Skip for now (light passes through)
+	//for (auto& e : transparentEntities)
+	//{
+	//	shadowVS->SetMatrix4x4("world", e.GetTransform()->GetWorldMatrix());
+	//	shadowVS->CopyAllBufferData();
+	//	// Draw the mesh directly to avoid the entity's material
+	//	// Note: Your code may differ significantly here!
+	//	e.GetMesh()->Draw();
+	//}
 	// Reset the pipline
 	viewport.Width = (float)*windowWidth;
 	viewport.Height = (float)*windowHeight;
